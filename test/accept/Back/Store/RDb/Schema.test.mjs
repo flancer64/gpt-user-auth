@@ -42,19 +42,14 @@ before(async () => {
 
     // Create an app user
     const trx = await conn.startTransaction();
-    try {
-        const rdbBase = {
-            getAttributes: () => ({ID: 'id'}),
-            getEntityName: () => '/user',
-            getPrimaryKey: () => ['id'],
-        };
-        const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
-        await trx.commit();
-        USER_ID = id;
-    } catch (e) {
-        await trx.rollback();
-        logger.exception(e);
-    }
+    const rdbBase = {
+        getAttributes: () => ({ID: 'id'}),
+        getEntityName: () => '/user',
+        getPrimaryKey: () => ['id'],
+    };
+    const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
+    await trx.commit();
+    USER_ID = id;
 });
 
 after(async () => {
@@ -64,6 +59,8 @@ after(async () => {
 describe('RDb schema', () => {
 
     it('should create a user', async () => {
+        let pk;
+        const ATTR = rdbUser.getAttributes();
         const trx = await conn.startTransaction();
         try {
             const dto = rdbUser.createDto();
@@ -73,31 +70,34 @@ describe('RDb schema', () => {
             dto.pass_salt = 'salt';
             dto.status = STATUS.UNVERIFIED;
             dto.user_ref = USER_ID;
-            const {user_ref} = await crud.create(trx, rdbUser, dto);
+            pk = await crud.create(trx, rdbUser, dto);
             await trx.commit();
-            // Assertion
-            assert.strictEqual(user_ref, USER_ID);
         } catch (e) {
             await trx.rollback();
             logger.exception(e);
         }
+        // Assertion
+        assert.strictEqual(pk[ATTR.USER_REF], USER_ID);
 
     });
 
     it('should create a token', async () => {
+        let pk;
+        const CODE = 'some code for the token';
+        const ATTR = rdbToken.getAttributes();
         const trx = await conn.startTransaction();
         try {
             const dto = rdbToken.createDto();
             dto.user_ref = USER_ID;
             dto.type = 'TEST_TYPE';
-            dto.code = 'TOKEN CODE';
-            const {user_ref} = await crud.create(trx, rdbToken, dto);
+            dto.code = CODE;
+            pk = await crud.create(trx, rdbToken, dto);
             await trx.commit();
-            // Assertion
-            assert.strictEqual(user_ref, USER_ID);
         } catch (e) {
             await trx.rollback();
             logger.exception(e);
         }
+        // Assertion
+        assert.strictEqual(pk[ATTR.CODE], CODE);
     });
 });

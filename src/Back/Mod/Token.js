@@ -5,7 +5,7 @@ import {randomUUID} from 'crypto';
  *
  * @implements TeqFw_Core_Shared_Api_Model
  */
-export default class Fl64_Gpt_User_Back_Mod_Fl32_Bot_Gpt_Token {
+export default class Fl64_Gpt_User_Back_Mod_Token {
     /**
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
@@ -161,7 +161,7 @@ export default class Fl64_Gpt_User_Back_Mod_Fl32_Bot_Gpt_Token {
          *
          * @returns {Promise<Fl64_Gpt_User_Shared_Dto_Token.Dto|null>}
          */
-        this.update = async function (opts) {
+        this.update = async function ({}) {
             throw new Error('Updating a token is not allowed. Please delete the existing token and create a new one.');
         };
     }
