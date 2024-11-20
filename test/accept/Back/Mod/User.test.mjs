@@ -1,9 +1,16 @@
 import assert from 'assert';
 import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
+import {join} from 'path';
 
 // SETUP ENVIRONMENT
+/** @type {TeqFw_Core_Back_Config} */
+let config = await container.get('TeqFw_Core_Back_Config$');
+/** @type {TeqFw_Core_Shared_Api_Logger} */
+let logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
 /** @type {TeqFw_Db_Back_RDb_Connect} */
-let dbConn;
+let conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+/** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
+let crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Mod_User} */
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
 
@@ -12,37 +19,44 @@ const EMAIL = 'alex@flancer64.com';
 const EMAIL_UPDATED = 'alex@flancer32.com';
 
 before(async () => {
+    // Initialize environment configuration
+    config.init(cfgTest.pathToRoot, '0.0.0');
+
     // Set up console transport for the logger
     const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
     const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
     base.setTransport(transport);
 
-    // Initialize environment configuration
-    /** @type {TeqFw_Core_Back_Config} */
-    const config = await container.get('TeqFw_Core_Back_Config$');
-    config.init(cfgTest.pathToRoot, 'test');
-
     // Framework-wide RDB connection from DI
-    dbConn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
-    await dbConnect(RDBMS.SQLITE_BETTER, dbConn);
+    await dbConnect(RDBMS.SQLITE_BETTER, conn);
 
     // Initialize database structure
-    const cliInit = await container.get('TeqFw_Db_Back_Cli_Init$');
-    await cliInit.action();
+    /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
+    const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
+    const testDems = {
+        test: join(config.getPathToRoot(), 'test', 'data'),
+    };
+    await action({testDems});
 
     // Create an app user
-    const dto = modUserApp.composeEntity();
-    dto.dateBirth = new Date('1973/01/01');
-    dto.gender = 'MALE';
-    dto.height = 175;
-    dto.name = 'User Test';
-    dto.weightCurrent = 93000;
-    const user = await modUserApp.create({dto});
-    USER_ID = user.id;
+    const trx = await conn.startTransaction();
+    try {
+        const rdbBase = {
+            getAttributes: () => ({ID: 'id'}),
+            getEntityName: () => '/user',
+            getPrimaryKey: () => ['id'],
+        };
+        const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
+        await trx.commit();
+        USER_ID = id;
+    } catch (e) {
+        await trx.rollback();
+        logger.exception(e);
+    }
 });
 
 after(async () => {
-    await dbConn.disconnect();
+    await conn.disconnect();
 });
 
 // Test Suite for User Model

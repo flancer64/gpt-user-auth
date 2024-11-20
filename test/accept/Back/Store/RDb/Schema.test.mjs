@@ -4,64 +4,66 @@ import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
 
 // SETUP ENVIRONMENT
 /** @type {TeqFw_Core_Back_Config} */
-let config;
+let config = await container.get('TeqFw_Core_Back_Config$');
 /** @type {TeqFw_Core_Shared_Api_Logger} */
-let logger;
+let logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
 /** @type {TeqFw_Db_Back_RDb_Connect} */
-let conn;
+let conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
 /** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
-let crud;
+let crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_User} */
-let rdbUser;
+let rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
-let STATUS;
+let STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
+
+let USER_ID;
 
 before(async () => {
     // Initialize environment configuration
-    config = await container.get('TeqFw_Core_Back_Config$');
     config.init(cfgTest.pathToRoot, 'test');
-    /**
-     * Framework-wide RDB connection from DI. This connection is used by event listeners.
-     */
-    conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+
+    // Set up console transport for the logger
+    const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
+    const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
+    base.setTransport(transport);
+
+    // Framework-wide RDB connection from DI
     await dbConnect(RDBMS.SQLITE_BETTER, conn);
-    crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
-    rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
-    STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status$');
+
+    // Initialize database structure
+    /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
+    const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
+    const testDems = {
+        test: join(config.getPathToRoot(), 'test', 'data'),
+    };
+    await action({testDems});
+
+    // Create an app user
+    const trx = await conn.startTransaction();
+    try {
+        const rdbBase = {
+            getAttributes: () => ({ID: 'id'}),
+            getEntityName: () => '/user',
+            getPrimaryKey: () => ['id'],
+        };
+        const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
+        await trx.commit();
+        USER_ID = id;
+    } catch (e) {
+        await trx.rollback();
+        logger.exception(e);
+    }
+});
+
+after(async () => {
+    await conn.disconnect();
 });
 
 describe('RDb schema', () => {
-    before(async () => {
-        // Set up console transport for the logger
-        /** @type {TeqFw_Core_Shared_Logger_Base} */
-        const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
-        /** @type {TeqFw_Core_Shared_Api_Logger_Transport} */
-        const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
-        base.setTransport(transport);
-        logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
-        // Initialize database structure
-        /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
-        const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
-        const testDems = {
-            test: join(config.getPathToRoot(), 'test', 'data'),
-        };
-        await action({testDems});
-    });
-
-    after(async () => {
-        await conn.disconnect();
-    });
 
     it('create a user', async () => {
         const trx = await conn.startTransaction();
         try {
-            const USER_ID = 1;
-            const rdbBase = {
-                getAttributes: () => ({ID: 'id'}),
-                getEntityName: () => '/user',
-                getPrimaryKey: () => ['id'],
-            };
-            await crud.create(trx, rdbBase, {id: USER_ID});
             const dto = rdbUser.createDto();
             dto.pin = 1024;
             dto.email = 'address@mail.com';

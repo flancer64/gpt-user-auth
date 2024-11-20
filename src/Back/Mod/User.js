@@ -128,6 +128,7 @@ export default class Fl64_Gpt_User_Back_Mod_User {
                 let isUnique = false;
 
                 while (!isUnique) {
+                    // TODO: variable length for the PIN
                     pin = randomInt(1000, 10000); // 4-digit PIN
                     const {dbUser} = await readEntity({trx, pin});
                     if (!dbUser) {
