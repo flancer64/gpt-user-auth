@@ -1,0 +1,10 @@
+{
+  "entity": {
+    "user": {
+      "comment": "Application registry for users.",
+      "attr": {
+        "id": {"type": "id"}
+      }
+    }
+  }
+}

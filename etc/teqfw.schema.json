@@ -1,0 +1,65 @@
+{
+  "package": {
+    "fl64": {
+      "package": {
+        "gpt": {
+          "entity": {
+            "user": {
+              "comment": "Registry of users authenticated through ChatGPT.",
+              "attr": {
+                "user_ref": {
+                  "type": "ref",
+                  "comment": "Reference to the app user."
+                },
+                "pin": {
+                  "type": "integer",
+                  "comment": "PIN code stored as an integer; formatting (e.g., number of digits, numeral system) is managed by the application."
+                },
+                "pass_hash": {
+                  "type": "string",
+                  "comment": "Hash of the passphrase used for user confirmation."
+                },
+                "pass_salt": {
+                  "type": "string",
+                  "comment": "Salt used in hashing the passphrase for added security."
+                },
+                "email": {
+                  "type": "string",
+                  "comment": "User's email address stored in lowercase; only the address itself (e.g., user@mail.com)."
+                },
+                "status": {
+                  "type": "enum",
+                  "comment": "Status of the user account for GPT authentication.",
+                  "options": {
+                    "values": ["UNVERIFIED", "ACTIVE", "BLOCKED"]
+                  },
+                  "default": "UNVERIFIED"
+                },
+                "date_created": {
+                  "type": "datetime",
+                  "comment": "Date and time when the GPT user record was created.",
+                  "default": "current"
+                }
+              },
+              "index": {
+                "email": {"type": "unique", "attrs": ["email"]},
+                "pin": {"type": "unique", "attrs": ["pin"]},
+                "user": {"type": "unique", "attrs": ["user_ref"]}
+              },
+              "relation": {
+                "user": {
+                  "attrs": ["user_ref"],
+                  "ref": {"path": "/user", "attrs": ["id"]},
+                  "action": {"delete": "cascade", "update": "cascade"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "refs": {
+    "/user": ["id"]
+  }
+}

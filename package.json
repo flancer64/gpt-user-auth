@@ -1,0 +1,38 @@
+{
+  "name": "@flancer64/gpt-user-auth",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "TeqFW plugin for seamless user authentication via ChatGPT. This plugin enables user registration, login, and profile management with the power of AI, ensuring a user-friendly and secure authentication experience.",
+  "homepage": "https://github.com/flancer64/gpt-user-auth/",
+  "bugs": {
+    "url": "https://github.com/flancer64/gpt-user-auth/issues",
+    "email": "alex@flancer64.com"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Alex Gusev",
+    "email": "alex@flancer64.com",
+    "url": "https://github.com/flancer64"
+  },
+  "repository": "github:flancer64/gpt-user-auth",
+  "scripts": {
+    "db-init": "node ./bin/tequila.mjs db-init",
+    "db-reset": "node ./bin/tequila.mjs db-export -f ./var/data.json && node ./bin/tequila.mjs db-init && node ./bin/tequila.mjs db-import -f ./var/data.json ",
+    "help": "node ./bin/tequila.mjs -h",
+    "start": "node ./bin/tequila.mjs web-server-start",
+    "stop": "node ./bin/tequila.mjs web-server-stop",
+    "test:func": "mocha ./test/func --recursive",
+    "test:unit": "mocha ./test/unit --recursive",
+    "version": "node ./bin/tequila.mjs core-version"
+  },
+  "dependencies": {
+    "@teqfw/db": ">=0.22.1 <1.0.0",
+    "@teqfw/email": ">=0.21.0 <1.0.0",
+    "@teqfw/web-api": ">=0.21.0 <1.0.0"
+  },
+  "devDependencies": {
+    "@teqfw/test": ">=0.20.1 <1.0.0",
+    "better-sqlite3": "^11.5.0",
+    "mocha": "latest"
+  }
+}
