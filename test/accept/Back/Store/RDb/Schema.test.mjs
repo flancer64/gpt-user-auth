@@ -11,6 +11,8 @@ let logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
 let conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
 /** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
 let crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
+/** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_Token} */
+let rdbToken = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Token$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_User} */
 let rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
@@ -61,7 +63,7 @@ after(async () => {
 
 describe('RDb schema', () => {
 
-    it('create a user', async () => {
+    it('should create a user', async () => {
         const trx = await conn.startTransaction();
         try {
             const dto = rdbUser.createDto();
@@ -80,5 +82,22 @@ describe('RDb schema', () => {
             logger.exception(e);
         }
 
+    });
+
+    it('should create a token', async () => {
+        const trx = await conn.startTransaction();
+        try {
+            const dto = rdbToken.createDto();
+            dto.user_ref = USER_ID;
+            dto.type = 'TEST_TYPE';
+            dto.code = 'TOKEN CODE';
+            const {user_ref} = await crud.create(trx, rdbToken, dto);
+            await trx.commit();
+            // Assertion
+            assert.strictEqual(user_ref, USER_ID);
+        } catch (e) {
+            await trx.rollback();
+            logger.exception(e);
+        }
     });
 });
