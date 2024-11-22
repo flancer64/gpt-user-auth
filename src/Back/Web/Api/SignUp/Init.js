@@ -16,7 +16,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Operation_Email_SignUp_Init} operEmailSend
+     * @param {Fl64_Gpt_User_Back_Email_SignUp_Init} emailSignUp
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN
      */
     constructor(
@@ -27,7 +27,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Operation_Email_SignUp_Init$: operEmailSend,
+            Fl64_Gpt_User_Back_Email_SignUp_Init$: emailSignUp,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN,
         }
     ) {
@@ -47,7 +47,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
          * @returns {Promise<void>}
          */
         this.process = async function (req, res, context) {
-            if (modAuth.hasBearerInResponse(context.response)) {
+            if (modAuth.hasBearerInRequest(context.request)) {
                 const rs = endpoint.createRes();
                 rs.resultCode = CODE.SERVER_ERROR;
                 rs.instructions = `
@@ -56,7 +56,9 @@ If the issue persists, contact the application support team.
 `;
                 const trx = await conn.startTransaction();
                 try {
-                    const {email, isConsent, passPhrase} = req;
+                    const email = req.email;
+                    const isConsent = req.isConsent;
+                    const passPhrase = req.passPhrase;
                     // Check if the user consented to data processing
                     if (!isConsent) {
                         rs.resultCode = CODE.SUCCESS;
@@ -77,7 +79,7 @@ refer to the application's privacy policy or contact support for assistance.
                             dto.passHash = modUser.hashPassPhrase({passPhrase, salt: dto.passSalt});
                             const createdUser = await modUser.create({trx, dto});
                             if (createdUser) {
-                                await operEmailSend.execute({
+                                await emailSignUp.execute({
                                     trx,
                                     userId: createdUser.userRef,
                                     tokenType: TOKEN.EMAIL_VERIFICATION

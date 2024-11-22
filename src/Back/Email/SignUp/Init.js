@@ -3,10 +3,12 @@
  * This operation retrieves user data, generates or validates a verification token,
  * and sends a verification email containing a unique link for email verification.
  * The operation ensures transaction safety and logs the process.
+ *
+ * TODO: make it a service
  */
 
 /**
- * @memberOf Fl64_Gpt_User_Back_Operation_Email_SignUp_Init
+ * @memberOf Fl64_Gpt_User_Back_Email_SignUp_Init
  */
 const ResultCodes = {
     EMAIL_SEND_FAILED: 'EMAIL_SEND_FAILED',
@@ -16,16 +18,16 @@ const ResultCodes = {
 };
 Object.freeze(ResultCodes);
 
-export default class Fl64_Gpt_User_Back_Operation_Email_SignUp_Init {
+export default class Fl64_Gpt_User_Back_Email_SignUp_Init {
     /**
      * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Back_Config} config
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {TeqFw_Email_Back_Act_Send} actSend
-     * @param {Fl64_Gpt_User_Back_Mod_App_Email_Loader} emailLoader
-     * @param {Fl64_Gpt_User_Back_Mod_User} modUserGpt
-     * @param {Fl64_Gpt_User_Back_Mod_Fl32_Bot_Gpt_Token} modToken
+     * @param {TeqFw_Email_Back_Service_Load} serviceEmailLoad
+     * @param {Fl64_Gpt_User_Back_Mod_User} modUser
+     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN
      */
     constructor(
@@ -35,9 +37,9 @@ export default class Fl64_Gpt_User_Back_Operation_Email_SignUp_Init {
             TeqFw_Core_Shared_Api_Logger$$: logger,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             TeqFw_Email_Back_Act_Send$: actSend,
-            Fl64_Gpt_User_Back_Mod_App_Email_Loader$: emailLoader,
-            Fl64_Gpt_User_Back_Mod_User$: modUserGpt,
-            Fl64_Gpt_User_Back_Mod_Fl32_Bot_Gpt_Token$: modToken,
+            TeqFw_Email_Back_Service_Load$: serviceEmailLoad,
+            Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Gpt_User_Back_Mod_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN,
         }
     ) {
@@ -62,14 +64,20 @@ export default class Fl64_Gpt_User_Back_Operation_Email_SignUp_Init {
          * Sends an email containing the verification link.
          * @param {string} to - Recipient's email address.
          * @param {string} code - Verification code to include in the link.
+         * @param {string} [locale] - The desired locale of the user (e.g., 'ru-RU').
+         * @param {string} [localeDef] - The default locale of the application (e.g., 'en-US').
          * @return {Promise<{success: boolean}>}
          */
-        async function sendEmail(to, code) {
+        async function sendEmail(to, code, locale, localeDef) {
             const base = getBaseUrl();
             const verify_link = base.replace(':code', code);
-            const {subject, text, html} = await emailLoader.execute({
-                templateName: 'Gpt_SignUp_Init',
-                vars: {verify_link}
+            const {subject, text, html} = await serviceEmailLoad.execute({
+                pkg: DEF.NAME,
+                templateName: DEF.EMAIL_SIGN_UP_INIT,
+                vars: {verify_link},
+                locale,
+                localeDef,
+                localePlugin: 'en',
             });
             const {success} = await actSend.act({to, subject, text, html});
             if (success) {
@@ -95,7 +103,7 @@ export default class Fl64_Gpt_User_Back_Operation_Email_SignUp_Init {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 // Read user data to get the email address
-                const user = await modUserGpt.read({trx: trxLocal, userRef: userId});
+                const user = await modUser.read({trx: trxLocal, userRef: userId});
                 if (user) {
                     // Attempt to read an existing token by its code
                     let dtoToken = null;
@@ -129,7 +137,7 @@ export default class Fl64_Gpt_User_Back_Operation_Email_SignUp_Init {
         };
 
         /**
-         * @return {typeof Fl64_Gpt_User_Back_Operation_Email_SignUp_Init.ResultCodes}
+         * @return {typeof Fl64_Gpt_User_Back_Email_SignUp_Init.ResultCodes}
          */
         this.getResultCodes = () => ResultCodes;
     }

@@ -1,0 +1,14 @@
+Dear User,
+
+Thank you for registering with our service! To complete your registration and activate your account, please verify your email address by clicking the link below:
+
+{{verify_link}}
+
+If the link above does not work, copy and paste it into your browser.
+
+Please note: This verification link will expire in 24 hours.
+
+If you did not initiate this registration, please ignore this email.
+
+Best regards,
+The Support Team

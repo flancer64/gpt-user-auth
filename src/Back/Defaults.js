@@ -2,12 +2,15 @@
  * Plugin constants (hardcoded configuration) for frontend code.
  */
 export default class Fl64_Gpt_User_Back_Defaults {
-    NAME;
+    EMAIL_SIGN_UP_INIT = 'SignUp_Init';
+
     /** @type {TeqFw_Web_Back_Defaults} */
     MOD_WEB;
+
+    NAME;
+
     /** @type {Fl64_Gpt_User_Shared_Defaults} */
     SHARED;
-
     /**
      * @param {TeqFw_Web_Back_Defaults} MOD_WEB
      * @param {Fl64_Gpt_User_Shared_Defaults} SHARED
