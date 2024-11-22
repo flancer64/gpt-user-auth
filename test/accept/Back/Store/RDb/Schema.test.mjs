@@ -4,19 +4,19 @@ import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
 
 // SETUP ENVIRONMENT
 /** @type {TeqFw_Core_Back_Config} */
-let config = await container.get('TeqFw_Core_Back_Config$');
+const config = await container.get('TeqFw_Core_Back_Config$');
 /** @type {TeqFw_Core_Shared_Api_Logger} */
-let logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
+const logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
 /** @type {TeqFw_Db_Back_RDb_Connect} */
-let conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
 /** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
-let crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
+const crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_Token} */
-let rdbToken = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Token$');
+const rdbToken = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Token$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_User} */
-let rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
+const rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
-let STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
+const STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
 
 let USER_ID;
 

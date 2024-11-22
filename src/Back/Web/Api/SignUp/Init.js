@@ -61,7 +61,7 @@ If the issue persists, contact the application support team.
                     const passPhrase = req.passPhrase;
                     // Check if the user consented to data processing
                     if (!isConsent) {
-                        rs.resultCode = CODE.SUCCESS;
+                        rs.resultCode = CODE.CONSENT_REQUIRED;
                         rs.instructions = `
 Registration cannot proceed because you did not agree to the data processing terms. 
 Please provide your consent to continue. If you have any questions regarding data processing, 

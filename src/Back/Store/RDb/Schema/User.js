@@ -16,6 +16,7 @@ const ENTITY = '/fl64/gpt/user';
 const ATTR = {
     DATE_CREATED: 'date_created',
     EMAIL: 'email',
+    LOCALE: 'locale',
     PASS_HASH: 'pass_hash',
     PASS_SALT: 'pass_salt',
     PIN: 'pin',
@@ -37,6 +38,11 @@ class Dto {
      * @type {string}
      */
     email;
+    /**
+     * @type {string}
+     * User's preferred locale for interactions with the application (e.g., es-ES).
+     */
+    locale;
     /**
      * @type {string}
      * Hash of the passphrase for user confirmation.
@@ -92,6 +98,7 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_User {
             const res = new Dto();
             res.date_created = cast.date(data?.date_created);
             res.email = cast.string(data?.email);
+            res.locale = cast.string(data?.locale);
             res.pass_hash = cast.string(data?.pass_hash);
             res.pass_salt = cast.string(data?.pass_salt);
             res.pin = cast.int(data?.pin);

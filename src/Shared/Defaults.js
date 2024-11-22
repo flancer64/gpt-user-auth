@@ -8,7 +8,7 @@ export default class Fl64_Gpt_User_Shared_Defaults {
     /** @type {TeqFw_Web_Shared_Defaults} */
     MOD_WEB;
 
-    ROUTE_VERIFY = '/web/@flancer64/gpt-user-auth/verify.html?token=:code';
+    ROUTE_VERIFY = '/web/@flancer64/gpt-user-auth/signup/verify.html?token=:code';
 
     constructor(
         {

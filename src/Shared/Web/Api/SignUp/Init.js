@@ -42,6 +42,17 @@ class Request {
     isConsent;
 
     /**
+     * User's preferred locale for interactions with the application.
+     * This value will be used to determine the language and formatting settings for the user interface.
+     * It must conform to BCP 47 language tags.
+     *
+     * @type {string}
+     * @example "en-US" // English (United States).
+     * @example "ru-RU" // Russian (Russia).
+     */
+    locale;
+
+    /**
      * Secret passphrase chosen by the user for secure authentication.
      * This passphrase acts as a password and will be required for authentication in the application.
      * The passphrase can consist of multiple words to make it easier for users to input via voice interfaces.
@@ -93,13 +104,12 @@ class Response {
     resultCode;
 }
 
-
 /**
  * @implements TeqFw_Web_Api_Shared_Api_Endpoint
  */
 export default class Fl64_Gpt_User_Shared_Web_Api_SignUp_Init {
     /**
-     * @param {TeqFw_Core_Shared_Util_Cast} cast 
+     * @param {TeqFw_Core_Shared_Util_Cast} cast
      */
     constructor(
         {
@@ -119,6 +129,7 @@ export default class Fl64_Gpt_User_Shared_Web_Api_SignUp_Init {
             const req = new Request();
             req.email = cast.string(data?.email);
             req.isConsent = cast.booleanIfExists(data?.isConsent);
+            req.locale = cast.string(data?.locale);
             req.passPhrase = cast.string(data?.passPhrase);
             return req;
         };

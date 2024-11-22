@@ -68,6 +68,10 @@
                   "type": "string",
                   "comment": "User's email address stored in lowercase; only the address itself (e.g., user@mail.com)."
                 },
+                "locale": {
+                  "type": "string",
+                  "comment": "User's preferred locale for interactions with the application (e.g., es-ES)."
+                },
                 "status": {
                   "type": "enum",
                   "comment": "Status of the user account for GPT authentication.",
