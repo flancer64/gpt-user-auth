@@ -41,12 +41,11 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
 
         // MAIN
         /**
-         * Checks if the shared object of the response contains a valid Bearer token flag.
+         * Checks if the HTTP request contains a valid Bearer token.
          * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req
-         * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res
-         * @returns {boolean} True if the Bearer token flag is present and true; otherwise, false.
+         * @returns {boolean} True if the Bearer token is present and is authorized; otherwise, false.
          */
-        this.hasBearerInRequest = function (req, res) {
+        this.hasBearerInRequest = function (req) {
             let result = false;
             try {
                 const authHeader = req.headers[HTTP2_HEADER_AUTHORIZATION];
