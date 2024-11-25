@@ -1,118 +1,111 @@
+import {createContainer} from '@teqfw/test';
+import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../../../../common.mjs';
 import assert from 'assert';
-import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
-import {join} from 'path';
+
+// SETUP CONTAINER
+const container = await createContainer();
+await initConfig(container);
+
 
 // SETUP ENVIRONMENT
-/** @type {TeqFw_Core_Back_Config} */
-const config = await container.get('TeqFw_Core_Back_Config$');
-/** @type {TeqFw_Core_Shared_Api_Logger} */
-const logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
-/** @type {TeqFw_Db_Back_RDb_Connect} */
-const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
-/** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
-const crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Mod_User} */
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
+/** @type {Fl64_Gpt_User_Back_Mod_Token} */
+const modToken = await container.get('Fl64_Gpt_User_Back_Mod_Token$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
 const STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
+/** @type {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} */
+const TYPE = await container.get('Fl64_Gpt_User_Shared_Enum_Token_Type.default');
 
-/** @type {Fl64_Gpt_User_Back_Web_Api_SignUp_Verify} */
-const service = await container.get('Fl64_Gpt_User_Back_Web_Api_SignUp_Verify$');
-/** @type {Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify} */
-const endpoint = await container.get('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify$');
-const RESULT_CODE = endpoint.getResultCodes();
 
+// DECLARE THE TEST DATA
+let PIN;
+let TOKEN_CODE;
 let USER_ID;
 
 const EMAIL = 'alex@flancer64.com';
-const TOKEN = 'verification token';
-const PASS_PHRASE = 'my little pass word';
-
-
-before(async () => {
-    // Initialize environment configuration
-    config.init(cfgTest.pathToRoot, '0.0.0');
-
-    // Set up console transport for the logger
-    const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
-    const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
-    base.setTransport(transport);
-
-    // Framework-wide RDB connection from DI
-    await dbConnect(RDBMS.SQLITE_BETTER, conn);
-
-    // Initialize database structure
-    /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
-    const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
-    const testDems = {
-        test: join(config.getPathToRoot(), 'test', 'data'),
-    };
-    await action({testDems});
-
-    // Create an app user
-    const trx = await conn.startTransaction();
-    const rdbBase = {
-        getAttributes: () => ({ID: 'id'}),
-        getEntityName: () => '/user',
-        getPrimaryKey: () => ['id'],
-    };
-    const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
-    USER_ID = id;
-
-    // create a user
-    const dtoUser = modUser.composeEntity();
-    dtoUser.userRef = USER_ID;
-    dtoUser.email = EMAIL;
-    dtoUser.passHash = 'hash';
-    dtoUser.passSalt = 'salt';
-    await modUser.create({trx, dto: dtoUser});
-
-    await trx.commit();
-});
-
-after(async () => {
-    await conn.disconnect();
-});
+const LOCALE = 'es-ES';
 
 // Test Suite for User Model
 describe('Fl64_Gpt_User_Back_Web_Api_SignUp_Verify', () => {
+    /** @type {Fl64_Gpt_User_Back_Web_Api_SignUp_Verify} */
+    let service;
+    /** @type {Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify} */
+    let endpoint;
+    /** @type {typeof Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify.RESULT_CODE} */
+    let RESULT_CODE;
 
-    it('should successfully verify email for a valid token', async () => {
+    before(async function () {
+        this.timeout(60000); // for debug
+        const post = container.getPostProcessor();
+        post.addChunk({
+            modify(obj, originalId) {
+                if (originalId.moduleName === 'Fl64_Gpt_User_Back_Mod_User') {
+                    const originalModUserCreate = obj.create.bind(obj);
+                    // Override `create` to include the `modUser` call first
+                    obj.create = async function ({trx, dto}) {
+                        if (!dto?.userRef) dto.userRef = USER_ID;
+                        return await originalModUserCreate({trx, dto});
+                    };
+                }
+                return obj;
+            }
+        });
+        await initConfig(container, true);
+        await dbReset(container);
+        const {user} = await dbCreateFkEntities(container);
+        USER_ID = user.id;
+        await dbConnect(container);
+
+        /** @type {TeqFw_Db_Back_RDb_Connect} */
+        const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+        const trx = await conn.startTransaction();
+        // create a user
+        const dtoUser = modUser.composeEntity();
+        dtoUser.email = EMAIL;
+        dtoUser.locale = 'es-ES';
+        dtoUser.passHash = 'hash';
+        dtoUser.passSalt = 'salt';
+        dtoUser.userRef = USER_ID;
+        const createdUser = await modUser.create({trx, dto: dtoUser});
+        PIN = createdUser.pin;
+
+        // create a token
+        const dtoToken = modToken.composeEntity();
+        dtoToken.type = TYPE.EMAIL_VERIFICATION;
+        dtoToken.userRef = USER_ID;
+        const createdToken = await modToken.create({trx, dto: dtoToken});
+        TOKEN_CODE = createdToken.code;
+        await trx.commit();
+
+        service = await container.get('Fl64_Gpt_User_Back_Web_Api_SignUp_Verify$');
+        endpoint = await container.get('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify$');
+        RESULT_CODE = endpoint.getResultCodes();
+    });
+
+    after(async () => {
+        await dbDisconnect(container);
+    });
+
+    it('should successfully load user profile for a valid token', async () => {
         const req = endpoint.createReq();
-        req.token = TOKEN;
+        req.token = TOKEN_CODE;
         const res = endpoint.createRes();
         await service.process(req, res);
 
-        assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS, 'Expected resultCode to be SUCCESS for successful registration.');
-        assert.ok(res.instructions, 'Expected instructions to be provided in the response.');
-        assert.ok(res.pin, 'Expected a valid PIN code to be generated.');
+        assert.strictEqual(res.email, EMAIL, '...');
+        assert.strictEqual(res.locale, LOCALE, '...');
+        assert.strictEqual(res.pin, PIN, '...');
+        assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS, '...');
+        assert.strictEqual(res.status, STATUS.ACTIVE, '...');
     });
-
-    it('should not allow registration without consent', async () => {
+    it('should not load user profile for a second usage of the token', async () => {
         const req = endpoint.createReq();
-        req.email = EMAIL;
-        req.passPhrase = PASS_PHRASE;
-        req.locale = 'lv-LV';
+        req.token = TOKEN_CODE;
         const res = endpoint.createRes();
-        await service.process(req, res, context);
+        await service.process(req, res);
 
-        // Check if entity and item are correctly composed
-        assert.strictEqual(res.resultCode, RESULT_CODE.CONSENT_REQUIRED, 'Expected resultCode to be CONSENT_REQUIRED.');
-        assert.ok(res.instructions, 'Expected instructions to be provided in the response.');
-    });
-
-    it('should not allow registration for an already registered email', async () => {
-        const req = endpoint.createReq();
-        req.email = EMAIL;
-        req.passPhrase = PASS_PHRASE;
-        req.isConsent = true;
-        req.locale = 'lv-LV';
-        const res = endpoint.createRes();
-        await service.process(req, res, context);
-
-        // Check if entity and item are correctly composed
-        assert.strictEqual(res.resultCode, RESULT_CODE.EMAIL_ALREADY_REGISTERED, 'Expected resultCode to be EMAIL_ALREADY_REGISTERED.');
-        assert.ok(res.instructions, 'Expected instructions to be provided in the response.');
+        assert.strictEqual(res.resultCode, RESULT_CODE.INVALID_TOKEN, '....');
     });
 
 });

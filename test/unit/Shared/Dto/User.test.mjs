@@ -9,6 +9,7 @@ describe('Fl64_Gpt_User_Shared_Dto_User', () => {
     const expectedProperties = [
         'dateCreated',
         'email',
+        'locale',
         'passHash',
         'passSalt',
         'pin',

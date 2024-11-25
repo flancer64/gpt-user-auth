@@ -7,5 +7,5 @@
 /.vscode/
 /atlassian-ide-plugin.xml
 /cfg/local.*
-/test/data/*.sqlite3
+/test/data/*.sqlite3*
 /var/*

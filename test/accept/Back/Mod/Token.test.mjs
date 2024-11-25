@@ -1,16 +1,12 @@
 import assert from 'assert';
-import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
-import {join} from 'path';
+import {createContainer} from '@teqfw/test';
+import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../common.mjs';
+
+// SETUP CONTAINER
+const container = await createContainer();
+await initConfig(container);
 
 // SETUP ENVIRONMENT
-/** @type {TeqFw_Core_Back_Config} */
-const config = await container.get('TeqFw_Core_Back_Config$');
-/** @type {TeqFw_Core_Shared_Api_Logger} */
-const logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
-/** @type {TeqFw_Db_Back_RDb_Connect} */
-const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
-/** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
-const crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Mod_Token} */
 const modToken = await container.get('Fl64_Gpt_User_Back_Mod_Token$');
 
@@ -18,49 +14,20 @@ let USER_ID;
 let TOKEN_CODE;
 const TOKEN_TYPE = 'some token type';
 
-before(async () => {
-    // Initialize environment configuration
-    config.init(cfgTest.pathToRoot, '0.0.0');
-
-    // Set up console transport for the logger
-    const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
-    const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
-    base.setTransport(transport);
-
-    // Framework-wide RDB connection from DI
-    await dbConnect(RDBMS.SQLITE_BETTER, conn);
-
-    // Initialize database structure
-    /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
-    const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
-    const testDems = {
-        test: join(config.getPathToRoot(), 'test', 'data'),
-    };
-    await action({testDems});
-
-    // Create an app user
-    const trx = await conn.startTransaction();
-    try {
-        const rdbBase = {
-            getAttributes: () => ({ID: 'id'}),
-            getEntityName: () => '/user',
-            getPrimaryKey: () => ['id'],
-        };
-        const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
-        await trx.commit();
-        USER_ID = id;
-    } catch (e) {
-        await trx.rollback();
-        logger.exception(e);
-    }
-});
-
-after(async () => {
-    await conn.disconnect();
-});
 
 // Test Suite for User Model
 describe('Fl64_Gpt_User_Back_Mod_Token', () => {
+
+    before(async () => {
+        await dbReset(container);
+        const {user} = await dbCreateFkEntities(container);
+        USER_ID = user.id;
+        await dbConnect(container);
+    });
+
+    after(async () => {
+        await dbDisconnect(container);
+    });
 
     it('should successfully compose entity and item', async () => {
         const entity = modToken.composeEntity();

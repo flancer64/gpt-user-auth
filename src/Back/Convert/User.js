@@ -28,6 +28,7 @@ export default class Fl64_Gpt_User_Back_Convert_User {
             const res = domDto.createDto();
             res.dateCreated = cast.date(dbUser?.date_created);
             res.email = cast.string(dbUser?.email);
+            res.locale = cast.string(dbUser?.locale);
             res.passHash = cast.string(dbUser?.pass_hash);
             res.passSalt = cast.string(dbUser?.pass_salt);
             res.pin = cast.int(dbUser?.pin);
@@ -52,6 +53,7 @@ export default class Fl64_Gpt_User_Back_Convert_User {
             const dbUser = rdbDto.createDto();
             dbUser.date_created = cast.date(user?.dateCreated);
             dbUser.email = cast.string(user?.email);
+            dbUser.locale = cast.string(user?.locale);
             dbUser.pass_hash = cast.string(user?.passHash);
             dbUser.pass_salt = cast.string(user?.passSalt);
             dbUser.pin = cast.int(user?.pin);

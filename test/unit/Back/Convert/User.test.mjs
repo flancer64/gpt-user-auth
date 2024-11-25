@@ -13,6 +13,7 @@ describe('Fl64_Gpt_User_Back_Convert_User', () => {
     const sampleRdbDto = rdbDto.createDto({
         date_created: new Date('2023-01-01T00:00:00Z'),
         email: 'jane.doe@example.com',
+        locale: 'ru-RU',
         pass_hash: 'hashed_passphrase',
         pass_salt: 'random_salt_value',
         pin: 1234,
@@ -23,6 +24,7 @@ describe('Fl64_Gpt_User_Back_Convert_User', () => {
     const sampleDomDto = domDto.createDto({
         dateCreated: new Date('2023-01-01T00:00:00Z'),
         email: 'jane.doe@example.com',
+        locale: 'ru-RU',
         passHash: 'hashed_passphrase',
         passSalt: 'random_salt_value',
         pin: 1234,

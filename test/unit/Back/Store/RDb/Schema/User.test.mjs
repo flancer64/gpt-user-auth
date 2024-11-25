@@ -12,11 +12,12 @@ describe('Fl64_Gpt_User_Back_Store_RDb_Schema_User', () => {
     const expectedProperties = [
         'date_created',
         'email',
+        'locale',
         'pass_hash',
         'pass_salt',
         'pin',
         'status',
-        'user_ref'
+        'user_ref',
     ];
 
     it('should create an RDB DTO with only the expected properties', () => {

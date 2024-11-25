@@ -68,15 +68,6 @@ class Response {
     locale;
 
     /**
-     * Instructions for the user on their next steps.
-     * Typically includes guidance on how to complete their registration or use the application.
-     *
-     * @type {string}
-     * @example "You can now log in using your email and passphrase."
-     */
-    instructions;
-
-    /**
      * A unique PIN code assigned to the user.
      * This PIN is generated during registration and used for secure authentication.
      *

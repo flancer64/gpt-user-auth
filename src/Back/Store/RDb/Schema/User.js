@@ -5,6 +5,7 @@
 // MODULE'S VARS
 /**
  * Path to the entity in plugin's DEM.
+ *
  * @type {string}
  */
 const ENTITY = '/fl64/gpt/user';
@@ -31,40 +32,58 @@ Object.freeze(ATTR);
  */
 class Dto {
     /**
+     * The date when the user record was created.
+     *
      * @type {Date}
      */
     date_created;
+
     /**
+     * The user's email address.
+     *
      * @type {string}
      */
     email;
+
     /**
-     * @type {string}
      * User's preferred locale for interactions with the application (e.g., es-ES).
+     *
+     * @type {string}
      */
     locale;
+
     /**
-     * @type {string}
      * Hash of the passphrase for user confirmation.
+     *
+     * @type {string}
      */
     pass_hash;
+
     /**
-     * @type {string}
      * Salt used in hashing the passphrase.
+     *
+     * @type {string}
      */
     pass_salt;
+
     /**
-     * @type {number}
      * PIN code for authentication, stored as an integer.
+     *
+     * @type {number}
      */
     pin;
+
     /**
+     * Current status of the user account.
+     *
      * @type {string}
      * @see Fl64_Gpt_User_Shared_Enum_User_Status
      */
     status;
+
     /**
      * Reference to the main user in the application.
+     *
      * @type {number}
      */
     user_ref;
@@ -86,11 +105,13 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_User {
             Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Db_Back_RDb_Schema_EntityBase$: base,
             TeqFw_Core_Shared_Util_Cast$: cast,
-            Fl64_Gpt_User_Shared_Enum_User_Status$: STATUS,
+            'Fl64_Gpt_User_Shared_Enum_User_Status.defalt': STATUS,
         }
     ) {
         // INSTANCE METHODS
         /**
+         * Creates a new DTO object with casted properties.
+         *
          * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto} [data]
          * @returns {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto}
          */
@@ -109,6 +130,7 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_User {
 
         /**
          * Set JSDoc return type, real code is in `TeqFw_Db_Back_RDb_Schema_EntityBase`.
+         *
          * @returns {typeof Fl64_Gpt_User_Back_Store_RDb_Schema_User.ATTR}
          */
         this.getAttributes = function () {};

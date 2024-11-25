@@ -239,6 +239,7 @@ export default class Fl64_Gpt_User_Back_Mod_User {
                 const {dbUser} = await readEntity({trx: trxLocal, userRef: dto.userRef});
                 if (dbUser) {
                     dbUser.email = dto.email;
+                    dbUser.locale = dto.locale;
                     dbUser.pass_hash = dto.passHash;
                     dbUser.status = dto.status;
                     await updateEntity({trx: trxLocal, dbUser});

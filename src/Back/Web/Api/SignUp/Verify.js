@@ -9,7 +9,6 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
     /**
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
      * @param {Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify} endpoint
-     * @param {typeof Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify.ResultCode} RESULT_CODE
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
@@ -51,9 +50,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
                 // Find the verification record by token
                 const dtoToken = await modToken.read({trx, code});
                 if (!dtoToken) {
-                    rs.instructions = `Invalid or expired verification token.`;
                     rs.resultCode = RESULT_CODE.INVALID_TOKEN;
-                    logger.info(rs.instructions);
                 } else {
                     // Retrieve associated user
                     const dtoUser = await modUser.read({trx, userRef: dtoToken.userRef});
@@ -67,14 +64,13 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
                         await modToken.delete({trx, dto: dtoToken});
 
                         // Populate response with user profile data
-                        rs.instructions = `Email verified successfully.`;
-                        rs.email = dtoUser.email;
                         rs.dateCreated = dtoUser.dateCreated;
+                        rs.email = dtoUser.email;
+                        rs.locale = dtoUser.locale;
                         rs.pin = dtoUser.pin;
-                        rs.status = dtoUser.status;
                         rs.resultCode = RESULT_CODE.SUCCESS;
+                        rs.status = dtoUser.status;
                     } else {
-                        rs.instructions = `User associated with the token was not found.`;
                         rs.resultCode = RESULT_CODE.USER_NOT_FOUND;
                     }
                 }
@@ -82,6 +78,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
                 await trx.commit();
                 // Populate response
                 Object.assign(res, rs);
+                logger.info(`result code: ${res.resultCode}`);
             } catch (error) {
                 logger.exception(error);
                 await trx.rollback();

@@ -1,14 +1,14 @@
 import assert from 'assert';
-import {join} from 'path';
-import {config as cfgTest, container, dbConnect, RDBMS} from '@teqfw/test';
+import {createContainer} from '@teqfw/test';
+import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../common.mjs';
+
+// SETUP CONTAINER
+const container = await createContainer();
+await initConfig(container);
 
 // SETUP ENVIRONMENT
-/** @type {TeqFw_Core_Back_Config} */
-const config = await container.get('TeqFw_Core_Back_Config$');
 /** @type {TeqFw_Core_Shared_Api_Logger} */
 const logger = await container.get('TeqFw_Core_Shared_Api_Logger$$');
-/** @type {TeqFw_Db_Back_RDb_Connect} */
-const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
 /** @type {TeqFw_Db_Back_Api_RDb_CrudEngine} */
 const crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_Token} */
@@ -20,43 +20,22 @@ const STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.defaul
 
 let USER_ID;
 
-before(async () => {
-    // Initialize environment configuration
-    config.init(cfgTest.pathToRoot, 'test');
-
-    // Set up console transport for the logger
-    const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
-    const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
-    base.setTransport(transport);
-
-    // Framework-wide RDB connection from DI
-    await dbConnect(RDBMS.SQLITE_BETTER, conn);
-
-    // Initialize database structure
-    /** @type {{action: TeqFw_Db_Back_Cli_Init.action}} */
-    const {action} = await container.get('TeqFw_Db_Back_Cli_Init$');
-    const testDems = {
-        test: join(config.getPathToRoot(), 'test', 'data'),
-    };
-    await action({testDems});
-
-    // Create an app user
-    const trx = await conn.startTransaction();
-    const rdbBase = {
-        getAttributes: () => ({ID: 'id'}),
-        getEntityName: () => '/user',
-        getPrimaryKey: () => ['id'],
-    };
-    const {id} = await crud.create(trx, rdbBase, {id: USER_ID});
-    await trx.commit();
-    USER_ID = id;
-});
-
-after(async () => {
-    await conn.disconnect();
-});
 
 describe('RDb schema', () => {
+    /** @type {TeqFw_Db_Back_RDb_Connect} */
+    let conn;
+
+    before(async () => {
+        await dbReset(container);
+        const {user} = await dbCreateFkEntities(container);
+        USER_ID = user.id;
+        await dbConnect(container);
+        conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+    });
+
+    after(async () => {
+        await dbDisconnect(container);
+    });
 
     it('should create a user', async () => {
         let pk;
@@ -64,10 +43,11 @@ describe('RDb schema', () => {
         const trx = await conn.startTransaction();
         try {
             const dto = rdbUser.createDto();
-            dto.pin = 1024;
             dto.email = 'address@mail.com';
+            dto.locale = 'es-ES';
             dto.pass_hash = 'hash';
             dto.pass_salt = 'salt';
+            dto.pin = 1024;
             dto.status = STATUS.UNVERIFIED;
             dto.user_ref = USER_ID;
             pk = await crud.create(trx, rdbUser, dto);

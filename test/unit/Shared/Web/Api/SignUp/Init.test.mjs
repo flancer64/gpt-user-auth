@@ -10,6 +10,7 @@ describe('Fl64_Gpt_User_Shared_Web_Api_SignUp_Init', () => {
     const expectedRequestProperties = [
         'email',
         'isConsent',
+        'locale',
         'passPhrase',
     ];
 

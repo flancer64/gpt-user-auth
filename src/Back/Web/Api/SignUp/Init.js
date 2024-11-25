@@ -47,7 +47,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
          * @returns {Promise<void>}
          */
         this.process = async function (req, res, context) {
-            if (modAuth.hasBearerInRequest(context.request)) {
+            if (modAuth.hasBearerInRequest(context?.request)) {
                 const rs = endpoint.createRes();
                 rs.resultCode = CODE.SERVER_ERROR;
                 rs.instructions = `
@@ -58,6 +58,7 @@ If the issue persists, contact the application support team.
                 try {
                     const email = req.email;
                     const isConsent = req.isConsent;
+                    const locale = req.locale;
                     const passPhrase = req.passPhrase;
                     // Check if the user consented to data processing
                     if (!isConsent) {
@@ -75,6 +76,7 @@ refer to the application's privacy policy or contact support for assistance.
                             // Register new user if email is not already registered
                             const dto = modUser.composeEntity();
                             dto.email = email;
+                            dto.locale = locale;
                             dto.passSalt = randomUUID();
                             dto.passHash = modUser.hashPassPhrase({passPhrase, salt: dto.passSalt});
                             const createdUser = await modUser.create({trx, dto});

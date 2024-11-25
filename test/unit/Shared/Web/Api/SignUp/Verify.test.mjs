@@ -4,8 +4,7 @@ import assert from 'assert';
 // GET OBJECTS FROM CONTAINER
 /** @type {Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify} */
 const endpoint = await container.get('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify$');
-/** @type {typeof Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify.ResultCode} */
-const ResultCode = await container.get('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify.ResultCode');
+const RESULT_CODE = endpoint.getResultCodes();
 
 describe('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify', () => {
     // Expected properties for the Request DTO
@@ -15,9 +14,10 @@ describe('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify', () => {
 
     // Expected properties for the Response DTO
     const expectedResponseProperties = [
-        'message',
-        'email',
         'dateCreated',
+        'email',
+        'instructions',
+        'locale',
         'pin',
         'resultCode',
         'status',
@@ -69,7 +69,7 @@ describe('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify', () => {
     });
 
     it('should contain only the expected values in ResultCode', () => {
-        const resultCodeKeys = Object.keys(ResultCode).sort();
+        const resultCodeKeys = Object.keys(RESULT_CODE).sort();
 
         assert.deepStrictEqual(
             resultCodeKeys,
@@ -79,7 +79,7 @@ describe('Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify', () => {
 
         expectedResultCodes.forEach(code =>
             assert.strictEqual(
-                ResultCode[code],
+                RESULT_CODE[code],
                 code,
                 `ResultCode should contain the key "${code}" with value "${code}"`
             )

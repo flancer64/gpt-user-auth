@@ -18,6 +18,11 @@ class Dto {
      */
     email;
     /**
+     * User's preferred locale for interactions with the application (e.g., es-ES).
+     * @type {string}
+     */
+    locale;
+    /**
      * Hash of the passphrase for user confirmation.
      * @type {string}
      */
@@ -72,6 +77,7 @@ export default class Fl64_Gpt_User_Shared_Dto_User {
             // Cast known attributes
             res.dateCreated = cast.date(data?.dateCreated);
             res.email = cast.string(data?.email);
+            res.locale = cast.string(data?.locale);
             res.passHash = cast.string(data?.passHash);
             res.passSalt = cast.string(data?.passSalt);
             res.pin = cast.int(data?.pin);
