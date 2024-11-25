@@ -70,7 +70,8 @@
                 },
                 "locale": {
                   "type": "string",
-                  "comment": "User's preferred locale for interactions with the application (e.g., es-ES)."
+                  "comment": "User's preferred locale for interactions with the application (e.g., es-ES).",
+                  "default": "en"
                 },
                 "status": {
                   "type": "enum",
