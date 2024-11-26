@@ -2,7 +2,14 @@
  * Plugin constants (hardcoded configuration) for frontend code.
  */
 export default class Fl64_Gpt_User_Back_Defaults {
-    EMAIL_SIGN_UP_INIT = 'SignUp_Init';
+    EMAIL_SIGN_UP = 'SignUp';
+    EMAIL_UPDATE = 'Update';
+
+    /**
+     * Default locale for emails in this plugin.
+     * @type {string}
+     */
+    LOCALE = 'en';
 
     /** @type {TeqFw_Web_Back_Defaults} */
     MOD_WEB;

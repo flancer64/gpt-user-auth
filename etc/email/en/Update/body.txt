@@ -1,0 +1,10 @@
+Hello, {{username}}!
+
+You requested to update your profile. Please use the link below to access the profile editing form:
+
+{{edit_link}}
+
+If you did not request this change, please ignore this email or contact our support team.
+
+Thank you,
+The Support Team

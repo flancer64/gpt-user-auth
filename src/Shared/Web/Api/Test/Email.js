@@ -28,6 +28,14 @@ Object.freeze(RESULT_CODE);
  */
 class Request {
     /**
+     * Main body of the email to be sent.
+     * Optional, can be omitted if the subject alone provides sufficient context.
+     * @type {string|null}
+     * @example "Hello, this is a test email from our application!"
+     */
+    message;
+
+    /**
      * Passphrase used for user authentication.
      * Together with the PIN, this verifies the identity of the user making the request.
      * @type {string}
@@ -42,14 +50,6 @@ class Request {
      * @example 123456
      */
     pin;
-
-    /**
-     * Main body of the email to be sent.
-     * Optional, can be omitted if the subject alone provides sufficient context.
-     * @type {string|null}
-     * @example "Hello, this is a test email from our application!"
-     */
-    message;
 
     /**
      * Subject line for the email.

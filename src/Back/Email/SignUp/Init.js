@@ -73,11 +73,11 @@ export default class Fl64_Gpt_User_Back_Email_SignUp_Init {
             const verify_link = base.replace(':code', code);
             const {subject, text, html} = await serviceEmailLoad.execute({
                 pkg: DEF.NAME,
-                templateName: DEF.EMAIL_SIGN_UP_INIT,
+                templateName: DEF.EMAIL_SIGN_UP,
                 vars: {verify_link},
                 locale,
                 localeDef,
-                localePlugin: 'en',
+                localePlugin: DEF.LOCALE,
             });
             const {success} = await actSend.act({to, subject, text, html});
             if (success) {
