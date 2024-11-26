@@ -106,7 +106,7 @@
         }
       }
     },
-    "/web-api-service/GptAct_Shared_Web_Api_Gpt_Email_Send": {
+    "/web-api-service/Fl64_Gpt_User_Back_Web_Api_Test_Email": {
       "post": {
         "summary": "Send a message to the user's registered email",
         "description": "Allows sending a message to the email registered with the user's account. Requires the user's PIN, passphrase for authentication, and an optional message and subject for the email.",
@@ -129,14 +129,14 @@
                   },
                   "subject": {
                     "type": "string",
-                    "description": "The subject of the email. This field is required."
+                    "description": "The subject of the email. This field is optional and can be empty."
                   },
                   "message": {
                     "type": "string",
                     "description": "The body of the email. This field is optional and can be empty."
                   }
                 },
-                "required": ["pin", "passPhrase", "subject"]
+                "required": ["pin", "passPhrase"]
               }
             }
           }
