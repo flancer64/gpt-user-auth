@@ -22,7 +22,6 @@
     "start": "node ./bin/tequila.mjs web-server-start",
     "stop": "node ./bin/tequila.mjs web-server-stop",
     "test:accept": "mocha ./test/accept --recursive",
-    "test:func": "mocha ./test/func --recursive",
     "test:unit": "mocha ./test/unit --recursive",
     "version": "node ./bin/tequila.mjs core-version"
   },

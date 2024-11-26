@@ -65,7 +65,7 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         };
 
         this.loadUser = async function ({trx, pin, passPhrase}) {
-            let res;
+            let res = null;
             try {
                 const found = await modUser.read({trx, pin});
                 if (found) {
