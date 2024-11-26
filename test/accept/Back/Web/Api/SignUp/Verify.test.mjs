@@ -1,5 +1,5 @@
 import {createContainer} from '@teqfw/test';
-import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../../../../common.mjs';
+import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../../common.mjs';
 import assert from 'assert';
 
 // SETUP CONTAINER

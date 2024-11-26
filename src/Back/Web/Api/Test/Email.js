@@ -46,8 +46,8 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
          */
         this.process = async function (req, res, context) {
             // Ensure the request is authorized
-            if (!modAuth.hasBearerInRequest(context.request)) {
-                respond403(context.response);
+            if (!modAuth.hasBearerInRequest(context?.request)) {
+                respond403(context?.response);
                 return;
             }
 
