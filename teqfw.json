@@ -8,7 +8,8 @@
   "@teqfw/web-api": {
     "services": [
       "Fl64_Gpt_User_Back_Web_Api_SignUp_Init",
-      "Fl64_Gpt_User_Back_Web_Api_SignUp_Verify"
+      "Fl64_Gpt_User_Back_Web_Api_SignUp_Verify",
+      "Fl64_Gpt_User_Back_Web_Api_Test_Email"
     ]
   }
 }
