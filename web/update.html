@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Edit Profile</h1>
+    <div id="loader" class="loader"></div>
+    <form id="profileForm" style="display: none;">
+        <!-- Email (Read-Only) -->
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" readonly>
+        </div>
+
+        <!-- Date Created (Read-Only) -->
+        <div class="form-group">
+            <label for="dateCreated">Date Created</label>
+            <input id="dateCreated" name="dateCreated" type="text" readonly>
+        </div>
+
+        <!-- Status (Read-Only) -->
+        <div class="form-group">
+            <label for="status">Account Status</label>
+            <input id="status" name="status" type="text" readonly>
+        </div>
+
+        <!-- Locale (Editable) -->
+        <div class="form-group">
+            <label for="locale">Preferred Locale</label>
+            <input id="locale" name="locale" type="text" placeholder="Enter your preferred locale (e.g., en-US)">
+        </div>
+
+        <!-- Passphrase -->
+        <div class="form-group">
+            <label for="passphrase">New Pass Phrase</label>
+            <input id="passphrase" name="passphrase" type="text" placeholder="Enter a new pass phrase">
+        </div>
+
+        <!-- Submit Button -->
+        <button class="button" type="submit">Save Changes</button>
+    </form>
+    <div id="message" class="message" style="display: none;"></div>
+</div>
+
+<script type="module">
+    /**
+     * Fetches user profile data from the server.
+     * @param {string} token - Access token for fetching profile data.
+     * @returns {Promise<Object|null>} - User profile data or null on failure.
+     */
+    async function fetchUserData({token}) {
+        const url = '/web-api-service/Fl64_Gpt_User_Shared_Web_Api_Update_Load';
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({token}),
+            });
+            if (response.ok) {
+                const {data} = await response.json();
+                return data;
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+        return null;
+    }
+
+    /**
+     * Sends updated user data to the server.
+     * @param {Object} data - Data to be sent to the server.
+     * @param {string} data.token - Access token for updating profile data.
+     * @param {string} [data.locale] - New locale (optional).
+     * @param {string} [data.passphrase] - New pass phrase (optional).
+     * @returns {boolean} - True if update succeeded, false otherwise.
+     */
+    async function saveUserData(data) {
+        const url = '/web-api-service/Fl64_Gpt_User_Shared_Web_Api_Update_Save';
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data),
+            });
+            return response.ok;
+        } catch (error) {
+            console.error('Error saving user data:', error);
+        }
+        return false;
+    }
+
+    /**
+     * Formats an ISO date string to "YYYY/MM/DD HH:MM:SS".
+     * @param {string} dateString - ISO date string.
+     * @returns {string} - Formatted date string.
+     */
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // DOM elements
+    const form = document.getElementById('profileForm');
+    const loader = document.getElementById('loader');
+    const message = document.getElementById('message');
+
+    // Get token from query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    // Load profile data
+    (async () => {
+        const profileData = await fetchUserData({token});
+        if (profileData?.email) {
+            // Populate form fields
+            form.querySelector('#email').value = profileData.email || '';
+            form.querySelector('#dateCreated').value = formatDate(profileData.dateCreated);
+            form.querySelector('#status').value = profileData.status || '';
+            form.querySelector('#locale').value = profileData.locale || '';
+
+            // Show form and hide loader
+            loader.style.display = 'none';
+            form.style.display = 'block';
+        } else {
+            message.textContent = 'Failed to load profile data. Please try again later.';
+            message.style.display = 'block';
+            loader.style.display = 'none';
+        }
+    })();
+
+    // Handle form submission
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        // Collect form data
+        const locale = form.querySelector('#locale').value;
+        const passphrase = form.querySelector('#passphrase').value;
+
+        // Show loader
+        loader.style.display = 'block';
+        form.style.display = 'none';
+
+        // Send updated data
+        const success = await saveUserData({token, locale, passphrase});
+
+        // Display message
+        if (success) {
+            message.textContent = 'Profile updated successfully!';
+            message.style.color = '#10a37f';
+        } else {
+            message.textContent = 'Failed to update profile. Please try again.';
+            message.style.color = '#ff4d4d';
+        }
+
+        message.style.display = 'block';
+        loader.style.display = 'none';
+    });
+</script>
+</body>
+</html>

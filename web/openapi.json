@@ -106,7 +106,7 @@
         }
       }
     },
-    "/web-api-service/Fl64_Gpt_User_Back_Web_Api_Test_Email": {
+    "/web-api-service/Fl64_Gpt_User_Shared_Web_Api_Test_Email": {
       "post": {
         "summary": "Send a message to the user's registered email",
         "description": "Allows sending a message to the email registered with the user's account. Requires the user's PIN, passphrase for authentication, and an optional message and subject for the email.",
@@ -179,6 +179,86 @@
                       "description": "A general error message indicating that the service is temporarily unavailable."
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/web-api-service/Fl64_Gpt_User_Shared_Web_Api_Update_Init": {
+      "post": {
+        "summary": "Initiate Profile Editing Process",
+        "description": "Initiates the profile editing process by validating the provided email or PIN and sending a link for profile editing to the user's email.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address associated with the user's account. This is one of the possible identifiers for the profile editing request.",
+                    "example": "user@example.com"
+                  },
+                  "pin": {
+                    "type": "integer",
+                    "description": "A unique PIN assigned to the user during registration. This serves as a numeric identifier for the user's account.",
+                    "example": 123456
+                  }
+                },
+                "required": ["email", "pin"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The profile editing process was successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instructions": {
+                      "type": "string",
+                      "description": "A human-readable message describing the outcome of the profile editing initiation process. This helps the application or the user understand the result of the operation.",
+                      "example": "The profile editing link was successfully sent to the user's registered email address."
+                    },
+                    "resultCode": {
+                      "type": "string",
+                      "description": "A code indicating the result of the profile editing initiation operation. It can be used programmatically to determine success or failure.",
+                      "enum": ["SERVER_ERROR", "SUCCESS"],
+                      "example": "SUCCESS"
+                    }
+                  },
+                  "required": ["instructions", "resultCode"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error occurred during the profile editing initiation process.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instructions": {
+                      "type": "string",
+                      "description": "A human-readable message indicating that an error occurred during the process.",
+                      "example": "An unexpected server error occurred. Please try again later."
+                    },
+                    "resultCode": {
+                      "type": "string",
+                      "description": "A code indicating that a server error occurred.",
+                      "enum": ["SERVER_ERROR"],
+                      "example": "SERVER_ERROR"
+                    }
+                  },
+                  "required": ["instructions", "resultCode"]
                 }
               }
             }

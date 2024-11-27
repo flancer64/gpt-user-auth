@@ -105,7 +105,7 @@ export default class Fl64_Gpt_User_Back_Email_Update_Init {
                 if (email) {
                     const dto = modToken.composeEntity();
                     dto.userRef = userId;
-                    dto.type = TOKEN.EMAIL_VERIFICATION;
+                    dto.type = TOKEN.PROFILE_EDIT;
                     const dtoToken = await modToken.create({trx: trxLocal, dto});
 
                     // Send the verification email
