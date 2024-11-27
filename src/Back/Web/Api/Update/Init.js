@@ -13,15 +13,17 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {Fl64_Gpt_User_Back_Email_Update_Init} emailInit
      */
-    constructor({
-                    TeqFw_Core_Shared_Api_Logger$$: logger,
-                    Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
-                    TeqFw_Db_Back_RDb_IConnect$: conn,
-                    'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
-                    Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
-                    Fl64_Gpt_User_Back_Mod_User$: modUser,
-                    Fl64_Gpt_User_Back_Email_Update_Init$: emailInit,
-                }) {
+    constructor(
+        {
+            TeqFw_Core_Shared_Api_Logger$$: logger,
+            Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
+            TeqFw_Db_Back_RDb_IConnect$: conn,
+            'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
+            Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
+            Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Gpt_User_Back_Email_Update_Init$: emailInit,
+        }
+    ) {
         // Constants
         const RESULT_CODE = endpoint.getResultCodes();
 

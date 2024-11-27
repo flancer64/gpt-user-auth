@@ -26,7 +26,6 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
         }
     ) {
         // VARS
-        /** @type {typeof Fl64_Gpt_User_Shared_Web_Api_Update_Load.ResultCode} */
         const RES_CODE = endpoint.getResultCodes();
 
         // INSTANCE METHODS
@@ -42,15 +41,14 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
          * @returns {Promise<void>}
          */
         this.process = async function (req, res, context) {
-            const rs = endpoint.createRes();
-            rs.resultCode = RES_CODE.SERVER_ERROR;
+            res.resultCode = RES_CODE.SERVER_ERROR;
 
             const trx = await conn.startTransaction();
             try {
                 // Validate token
                 const token = req.token;
                 if (!token) {
-                    rs.resultCode = RES_CODE.INVALID_TOKEN;
+                    res.resultCode = RES_CODE.INVALID_TOKEN;
                 } else {
                     const foundToken = await modToken.read({trx, code: token});
                     if (foundToken && (foundToken.type === TOKEN_TYPE.PROFILE_EDIT)) {
@@ -58,28 +56,22 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
                         /** @type {Fl64_Gpt_User_Shared_Dto_User.Dto} */
                         const user = await modUser.read({trx, userRef: userId});
                         if (user) {
-                            rs.dateCreated = user.dateCreated;
-                            rs.email = user.email;
-                            rs.locale = user.locale;
-                            rs.pin = user.pin;
-                            rs.status = user.status;
-                            rs.resultCode = RES_CODE.SUCCESS;
+                            res.dateCreated = user.dateCreated;
+                            res.email = user.email;
+                            res.locale = user.locale;
+                            res.pin = user.pin;
+                            res.status = user.status;
+                            res.resultCode = RES_CODE.SUCCESS;
                         }
                     } else {
-                        rs.resultCode = RES_CODE.INVALID_TOKEN;
+                        res.resultCode = RES_CODE.INVALID_TOKEN;
                     }
                 }
-
-                // Commit the transaction
                 await trx.commit();
-
             } catch (error) {
                 await trx.rollback();
                 logger.exception(error);
             }
-            // Populate response
-            Object.assign(res, rs);
         };
-
     }
 }

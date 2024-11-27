@@ -3,19 +3,19 @@ import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '
 import assert from 'node:assert';
 import {constants as H2} from 'node:http2';
 
-// VARS
+// Constants
 const {
     HTTP2_HEADER_AUTHORIZATION,
     HTTP_STATUS_FORBIDDEN,
 } = H2;
-const TOKEN = process.env.AUTH_TOKEN ?? 'test-token';
+const BEARER = process.env.AUTH_TOKEN ?? 'test-token';
 const EMAIL = process.env.EMAIL ?? 'user@any.domain.in.tld';
 
-// CONTAINER SETUP
+// Container setup
 const container = await createContainer();
 await initConfig(container);
 
-// ENV SETUP
+// Service and endpoint instances
 /** @type {Fl64_Gpt_User_Back_Web_Api_Update_Init} */
 const service = await container.get('Fl64_Gpt_User_Back_Web_Api_Update_Init$');
 /** @type {Fl64_Gpt_User_Shared_Web_Api_Update_Init} */
@@ -26,13 +26,12 @@ const RESULT_CODE = endpoint.getResultCodes();
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
 
 describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
-    // VARS
     let USER_ID, PIN;
 
     const context = {
         request: {
             headers: {
-                [HTTP2_HEADER_AUTHORIZATION]: 'Bearer ' + TOKEN,
+                [HTTP2_HEADER_AUTHORIZATION]: 'Bearer ' + BEARER,
             },
         },
     };
@@ -56,8 +55,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         await dbDisconnect(container);
     });
 
-    it('should return SUCCESS when the profile update process is initiated successfully with PIN identifier', async () => {
-        // test the service
+    it('should return SUCCESS when the profile update process is initiated with a valid PIN', async () => {
         const req = endpoint.createReq();
         req.pin = PIN;
         const res = endpoint.createRes();
@@ -65,8 +63,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
     });
 
-    it('should return SUCCESS when the profile update process is initiated successfully with email identifier', async () => {
-        // test the service
+    it('should return SUCCESS when the profile update process is initiated with a valid email', async () => {
         const req = endpoint.createReq();
         req.email = EMAIL;
         const res = endpoint.createRes();
@@ -74,23 +71,21 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
     });
 
-    it('should handle cases where the provided PIN does not match any user', async () => {
-        // test the service
+    it('should return SUCCESS when the provided PIN or email does not match any user', async () => {
         const req = endpoint.createReq();
-        req.pin = PIN + 987398573493875;
-        req.email = EMAIL + 'some data in the end';
+        req.pin = PIN + 98875;
+        req.email = EMAIL + 'invalid-suffix';
         const res = endpoint.createRes();
         await service.process(req, res, context);
         assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
     });
 
-    it('should respond with 403 if the request is unauthorized', async () => {
-        // test the service
+    it('should respond with 403 if the authorization header is invalid', async () => {
         const req = endpoint.createReq();
         req.email = EMAIL;
         const res = endpoint.createRes();
         const contextWrong = structuredClone(context);
-        contextWrong.request.headers[HTTP2_HEADER_AUTHORIZATION] = 'this is wrong bearer';
+        contextWrong.request.headers[HTTP2_HEADER_AUTHORIZATION] = 'invalid-bearer';
         let status403;
         contextWrong.response = {
             headersSent: false,
@@ -105,19 +100,17 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         assert.strictEqual(status403, HTTP_STATUS_FORBIDDEN);
     });
 
-    it('should return SERVER_ERROR if an unexpected error occurs during the process', async () => {
-        // mock the model
-        const origin = modUser.read.bind(modUser);
-        modUser.read = () => { throw new Error('test error');};
-        // test the service
+    it('should return SERVER_ERROR if an unexpected error occurs', async () => {
+        const originalRead = modUser.read.bind(modUser);
+        modUser.read = () => { throw new Error('test error'); };
+
         const req = endpoint.createReq();
         req.pin = PIN;
         const res = endpoint.createRes();
         await service.process(req, res, context);
+
         assert.strictEqual(res.resultCode, RESULT_CODE.SERVER_ERROR);
-        // restore the model
-        modUser.read = origin;
+
+        modUser.read = originalRead;
     });
-
-
 });
