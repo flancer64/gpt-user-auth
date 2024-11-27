@@ -240,7 +240,10 @@ export default class Fl64_Gpt_User_Back_Mod_User {
                 if (dbUser) {
                     dbUser.email = dto.email;
                     dbUser.locale = dto.locale;
-                    dbUser.pass_hash = dto.passHash;
+                    if (dto.passHash && dto.passSalt) {
+                        dbUser.pass_hash = dto.passHash;
+                        dbUser.pass_salt = dto.passSalt;
+                    }
                     dbUser.status = dto.status;
                     await updateEntity({trx: trxLocal, dbUser});
                     logger.info(`User updated successfully with ID: ${dbUser.user_ref}`);
