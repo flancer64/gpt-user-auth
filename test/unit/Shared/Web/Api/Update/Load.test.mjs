@@ -18,6 +18,7 @@ describe('Fl64_Gpt_User_Shared_Web_Api_Update_Load', () => {
         'email',
         'locale',
         'pin',
+        'resultCode',
         'status',
     ];
 

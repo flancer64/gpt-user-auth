@@ -34,7 +34,8 @@
     "@teqfw/db": "github:teqfw/db#main",
     "@teqfw/email": "github:teqfw/email#main",
     "@teqfw/test": "github:teqfw/test#main",
-    "better-sqlite3": "^11.5.0",
+    "better-sqlite3": "latest",
+    "dotenv": "latest",
     "mocha": "latest"
   }
 }

@@ -1,4 +1,4 @@
-Hello, {{username}}!
+Hello there!
 
 You requested to update your profile. Please use the link below to access the profile editing form:
 

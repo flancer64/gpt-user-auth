@@ -1,24 +1,16 @@
 import {configDto, dbConnect as dbConnectFw, RDBMS} from '@teqfw/test';
 import {join} from 'path';
-
-const CONFIG = {
-    isConfigInitialized: false,
-    isDbConnected: false,
-};
+import 'dotenv/config';
 
 /**
  * @param {TeqFw_Di_Api_Container} container
  * @return {Promise<void>}
  */
 export async function dbConnect(container) {
-    if (!CONFIG.isDbConnected) {
-        /** @type {TeqFw_Db_Back_RDb_Connect} */
-        const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
-        // Set up DB connection for the Object Container
-        await dbConnectFw(RDBMS.SQLITE_BETTER, conn);
-
-        CONFIG.isDbConnected = true;
-    }
+    /** @type {TeqFw_Db_Back_RDb_Connect} */
+    const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
+    // Set up DB connection for the Object Container
+    await dbConnectFw(RDBMS.SQLITE_BETTER, conn);
 }
 
 /**
@@ -30,7 +22,6 @@ export async function dbDisconnect(container) {
         /** @type {TeqFw_Db_Back_RDb_Connect} */
         const conn = await container.get('TeqFw_Db_Back_RDb_IConnect$');
         await conn.disconnect();
-        CONFIG.isDbConnected = false;
     } catch (e) {
         debugger
     }
@@ -94,23 +85,18 @@ export async function dbReset(container) {
 
 /**
  * @param {TeqFw_Di_Api_Container} container
- * @param {boolean} force
  * @return {Promise<void>}
  */
-export async function initConfig(container, force = false) {
-    if (!CONFIG.isConfigInitialized || force) {
-        // Initialize environment configuration
-        /** @type {TeqFw_Core_Back_Config} */
-        const config = await container.get('TeqFw_Core_Back_Config$');
-        config.init(configDto.pathToRoot, '0.0.0');
+export async function initConfig(container) {
+    // Initialize environment configuration
+    /** @type {TeqFw_Core_Back_Config} */
+    const config = await container.get('TeqFw_Core_Back_Config$');
+    config.init(configDto.pathToRoot, '0.0.0');
 
-        // Set up console transport for the logger
-        /** @type {TeqFw_Core_Shared_Logger_Base} */
-        const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
-        /** @type {TeqFw_Core_Shared_Api_Logger_Transport} */
-        const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
-        base.setTransport(transport);
-
-        CONFIG.isConfigInitialized = true;
-    }
+    // Set up console transport for the logger
+    /** @type {TeqFw_Core_Shared_Logger_Base} */
+    const base = await container.get('TeqFw_Core_Shared_Logger_Base$');
+    /** @type {TeqFw_Core_Shared_Api_Logger_Transport} */
+    const transport = await container.get('TeqFw_Core_Shared_Api_Logger_Transport$');
+    base.setTransport(transport);
 }

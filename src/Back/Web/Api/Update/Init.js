@@ -1,59 +1,31 @@
 /**
- * Initialize the password change process for the user.
+ * Initialize the profile update process for the user.
  *
  * @implements TeqFw_Web_Api_Back_Api_Service
  */
 export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
     /**
-     * @param {Fl64_Gpt_User_Back_Defaults} DEF
-     * @param {TeqFw_Core_Back_Config} config
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
-     * @param {TeqFw_Email_Back_Act_Send} actSend
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
-     * @param {TeqFw_Email_Back_Service_Load} serviceEmailLoad
-     * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TYPE
+     * @param {Fl64_Gpt_User_Back_Email_Update_Init} emailInit
      */
-    constructor(
-        {
-            Fl64_Gpt_User_Back_Defaults$: DEF,
-            TeqFw_Core_Back_Config$: config,
-            TeqFw_Core_Shared_Api_Logger$$: logger,
-            Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
-            TeqFw_Db_Back_RDb_IConnect$: conn,
-            'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
-            TeqFw_Email_Back_Act_Send$: actSend,
-            Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
-            Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
-            TeqFw_Email_Back_Service_Load$: serviceEmailLoad,
-            Fl64_Gpt_User_Shared_Enum_Token_Type$: TYPE,
-        }
-    ) {
-        // VARS
+    constructor({
+                    TeqFw_Core_Shared_Api_Logger$$: logger,
+                    Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
+                    TeqFw_Db_Back_RDb_IConnect$: conn,
+                    'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
+                    Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
+                    Fl64_Gpt_User_Back_Mod_User$: modUser,
+                    Fl64_Gpt_User_Back_Email_Update_Init$: emailInit,
+                }) {
+        // Constants
         const RESULT_CODE = endpoint.getResultCodes();
-        // BASE URL for verification links
-        let URL_BASE;
 
-        // FUNCTIONS
-        /**
-         * Initializes the base URL for verification links from configuration.
-         * @return {string}
-         */
-        function getBaseUrl() {
-            if (!URL_BASE) {
-                /** @type {TeqFw_Web_Back_Plugin_Dto_Config_Local.Dto} */
-                const web = config.getLocal(DEF.SHARED.MOD_WEB.NAME);
-                URL_BASE = `https://${web.urlBase}${DEF.SHARED.ROUTE_UPDATE}`;
-            }
-            return URL_BASE;
-        }
-
-        // INSTANCE METHODS
+        // Instance Methods
 
         /**
          * Retrieve the endpoint definition.
@@ -62,67 +34,57 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
         this.getEndpoint = () => endpoint;
 
         /**
-         * Initialize the service. Placeholder for any initialization logic.
+         * Initialize the service. Reserved for future use.
          * @return {Promise<void>}
          */
-        this.init = async function () { };
+        this.init = async function () {};
 
         /**
          * Process the request to initialize the profile update process.
          *
-         * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init.Request} req - Request DTO.
-         * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init.Response} res - Response DTO.
-         * @param {TeqFw_Web_Api_Back_Api_Service_Context} [context] - Optional service context.
+         * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init.Request} req - The incoming request.
+         * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init.Response} res - The outgoing response.
+         * @param {TeqFw_Web_Api_Back_Api_Service_Context} [context] - Optional context for the request.
          * @return {Promise<void>}
          */
         this.process = async function (req, res, context) {
-            // Ensure the request is authorized
+            // Check for authorization
             if (!modAuth.hasBearerInRequest(context?.request)) {
                 respond403(context?.response);
                 return;
             }
 
-            const rs = endpoint.createRes();
             const trx = await conn.startTransaction();
-
             try {
-                // Validate the input PIN
+                // Validate input PIN or email
                 const pin = req.pin;
-                logger.info(`Profile update process initiated with PIN: ${pin}.`);
+                const email = req.email;
+                logger.info(`Starting profile update with PIN/email: ${pin ?? 'none'}/${email ?? 'none'}.`);
 
-                const foundUser = await modUser.read({trx, pin});
-                if (foundUser?.userRef) {
-                    const dtoToken = modToken.composeEntity();
-                    dtoToken.userRef = foundUser.userRef;
-                    dtoToken.type = TYPE.PROFILE_EDIT;
-                    const {code} = await modToken.create({trx, dto: dtoToken});
-                    const base = getBaseUrl();
-                    const verify_link = base.replace(':code', code);
-                    const {subject, text, html} = await serviceEmailLoad.execute({
-                        pkg: DEF.NAME,
-                        templateName: DEF.EMAIL_UPDATE,
-                        vars: {verify_link},
-                        locale: foundUser.locale,
-                        localeDef: DEF.LOCALE,
-                    });
-                    // Send the verification email
-                    actSend.act({to: foundUser.email, subject, text, html}).catch(logger.exception);
+                const found = await modUser.read({trx, pin, email});
+                if (found?.userRef) {
+                    // Asynchronously send email to the user
+                    emailInit
+                        .execute({
+                            email: found.email,
+                            userId: found.userRef,
+                        })
+                        .catch(logger.exception);
                 } else {
-                    logger.info(`No user found for PIN: ${pin}.`);
+                    logger.info(`No user found for PIN/email: ${pin ?? 'none'}/${email ?? 'none'}.`);
                 }
 
-                // Commit the transaction
                 await trx.commit();
-                rs.resultCode = RESULT_CODE.SUCCESS;
+
+                res.instructions = 'If the user provided valid credentials, a link to update the profile has been sent to their email.';
+                res.resultCode = RESULT_CODE.SUCCESS;
             } catch (error) {
                 logger.exception(error);
                 await trx.rollback();
-                rs.message = 'An unexpected error occurred during the profile update process.';
-                rs.resultCode = RESULT_CODE.SERVER_ERROR;
-            }
 
-            // Populate the response object
-            Object.assign(res, rs);
+                res.instructions = 'An unexpected error occurred. Please try again later.';
+                res.resultCode = RESULT_CODE.SERVER_ERROR;
+            }
         };
     }
 }
