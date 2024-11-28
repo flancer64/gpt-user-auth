@@ -48,7 +48,7 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         this.hasBearerInRequest = function (req) {
             let result = false;
             try {
-                const authHeader = req.headers[HTTP2_HEADER_AUTHORIZATION];
+                const authHeader = req?.headers[HTTP2_HEADER_AUTHORIZATION];
                 if (authHeader && authHeader.startsWith('Bearer ')) {
                     const bearerToken = authHeader.slice(7); // Remove 'Bearer ' prefix
                     const allowed = getAllowedBearers();

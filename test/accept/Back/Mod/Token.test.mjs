@@ -76,6 +76,12 @@ describe('Fl64_Gpt_User_Back_Mod_Token', () => {
         }
     });
 
+    it('should list all token entries', async () => {
+        // Retrieve all users
+        const tokens = await modToken.list();
+        assert.strictEqual(tokens.length, 1, 'The number of listed tokens should match the created tokens');
+    });
+
     it('should delete an existing user entry by user reference', async () => {
         const dto = await modToken.read({code: TOKEN_CODE});
         assert.ok(dto, 'The entry should exist before deletion');

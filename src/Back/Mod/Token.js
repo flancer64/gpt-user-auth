@@ -123,6 +123,32 @@ export default class Fl64_Gpt_User_Back_Mod_Token {
             return result;
         };
 
+
+        /**
+         * Retrieves all token entries from the database as domain DTOs.
+         *
+         * @param {Object} [params]
+         * @param {TeqFw_Db_Back_RDb_ITrans} [params.trx] - Optional transaction context.
+         * @returns {Promise<Fl64_Gpt_User_Shared_Dto_Token.Dto[]>}
+         * @throws {Error}
+         */
+        this.list = async function ({trx} = {}) {
+            const trxLocal = trx ?? await conn.startTransaction();
+            const result = [];
+            try {
+                const all = await crud.readSet(trxLocal, rdbToken);
+                for (const one of all) {
+                    result.push(convToken.db2dom({dbToken: one}));
+                }
+                if (!trx) await trxLocal.commit();
+            } catch (error) {
+                if (!trx) await trxLocal.rollback();
+                throw error;
+            }
+            return result;
+        };
+
+
         /**
          * Reads token data by token code.
          *

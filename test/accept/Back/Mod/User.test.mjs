@@ -79,6 +79,12 @@ describe('Fl64_Gpt_User_Back_Mod_User', () => {
         assert.strictEqual(updated.locale, LOCALE_UPDATED, 'User locale should be updated');
     });
 
+    it('should list all user entries', async () => {
+        // Retrieve all users
+        const users = await modUser.list();
+        assert.strictEqual(users.length, 1, 'The number of listed users should match the created users');
+    });
+
     it('should delete an existing user entry by user reference', async () => {
         // Deleting the created user entry
         const dto = await modUser.read({userRef: USER_ID});
