@@ -58,22 +58,35 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
 
             const trx = await conn.startTransaction();
             try {
-                // Validate input PIN or email
-                const pin = req.pin;
-                const email = req.email;
-                logger.info(`Starting profile update with PIN/email: ${pin ?? 'none'}/${email ?? 'none'}.`);
+                const {email, pin} = req;
+                logger.info(`Starting profile update process for email: ${email ?? 'none'}, PIN: ${pin ?? 'none'}.`);
 
-                const found = await modUser.read({trx, pin, email});
+                /** @type {Fl64_Gpt_User_Shared_Dto_User.Dto} */
+                let found = null;
+
+                // Attempt to find the user by email first
+                if (email) {
+                    found = await modUser.read({trx, email});
+                }
+
+                // If email lookup fails, attempt to find by PIN
+                if (!found?.userRef && pin) {
+                    logger.info(`Email lookup failed. Attempting PIN lookup for PIN: ${pin}.`);
+                    found = await modUser.read({trx, pin});
+                }
+
                 if (found?.userRef) {
-                    // Asynchronously send email to the user
+                    // Send email for profile update link asynchronously
                     emailInit
                         .execute({
                             email: found.email,
                             userId: found.userRef,
                         })
                         .catch(logger.exception);
+
+                    logger.info(`Profile update link sent to user with ID: ${found.userRef}.`);
                 } else {
-                    logger.info(`No user found for PIN/email: ${pin ?? 'none'}/${email ?? 'none'}.`);
+                    logger.info(`No user found for email: ${email ?? 'none'} and PIN: ${pin ?? 'none'}.`);
                 }
 
                 await trx.commit();

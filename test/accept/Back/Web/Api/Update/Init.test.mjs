@@ -55,6 +55,14 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         await dbDisconnect(container);
     });
 
+    it('should return SUCCESS when the profile update process is initiated with a valid email', async () => {
+        const req = endpoint.createReq();
+        req.email = EMAIL;
+        const res = endpoint.createRes();
+        await service.process(req, res, context);
+        assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
+    });
+
     it('should return SUCCESS when the profile update process is initiated with a valid PIN', async () => {
         const req = endpoint.createReq();
         req.pin = PIN;
@@ -63,9 +71,10 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
     });
 
-    it('should return SUCCESS when the profile update process is initiated with a valid email', async () => {
+    it('should return SUCCESS when the profile update process is initiated with an invalid email and valid PIN', async () => {
         const req = endpoint.createReq();
-        req.email = EMAIL;
+        req.email = 'user@does.not.exist';
+        req.pin = PIN;
         const res = endpoint.createRes();
         await service.process(req, res, context);
         assert.strictEqual(res.resultCode, RESULT_CODE.SUCCESS);
