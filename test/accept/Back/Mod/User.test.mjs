@@ -80,10 +80,17 @@ describe('Fl64_Gpt_User_Back_Mod_User', () => {
     });
 
     it('should list all user entries', async () => {
-        // Retrieve all users
-        const users = await modUser.list();
-        assert.strictEqual(users.length, 1, 'The number of listed users should match the created users');
+        /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_User} */
+        const rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
+        const ATTR = rdbUser.getAttributes();
+
+        let users = await modUser.list();
+        assert.strictEqual(users.length, 1, 'The total number of users should match the created entries.');
+
+        users = await modUser.list({where: {[ATTR.EMAIL]: EMAIL_UPDATED}});
+        assert.strictEqual(users.length, 1, 'The number of users should match those associated with the given email.');
     });
+
 
     it('should delete an existing user entry by user reference', async () => {
         // Deleting the created user entry

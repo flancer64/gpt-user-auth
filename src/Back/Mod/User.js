@@ -195,16 +195,16 @@ export default class Fl64_Gpt_User_Back_Mod_User {
         /**
          * Retrieves a list of all user records from the database as domain DTOs.
          *
-         * @param {Object} [params]
-         * @param {TeqFw_Db_Back_RDb_ITrans} [params.trx]
+         * @param {TeqFw_Db_Back_RDb_ITrans} [trx]
+         * @param {Object} [where]
          * @returns {Promise<Fl64_Gpt_User_Shared_Dto_User.Dto[]>}
          * @throws {Error}
          */
-        this.list = async function ({trx} = {}) {
+        this.list = async function ({trx, where} = {}) {
             const trxLocal = trx ?? await conn.startTransaction();
             const result = [];
             try {
-                const all = await crud.readSet(trxLocal, rdbUser);
+                const all = await crud.readSet(trxLocal, rdbUser, where);
                 for (const one of all) {
                     result.push(convUser.db2dom({dbUser: one}));
                 }

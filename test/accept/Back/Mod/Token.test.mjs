@@ -77,10 +77,28 @@ describe('Fl64_Gpt_User_Back_Mod_Token', () => {
     });
 
     it('should list all token entries', async () => {
-        // Retrieve all users
-        const tokens = await modToken.list();
-        assert.strictEqual(tokens.length, 1, 'The number of listed tokens should match the created tokens');
+        /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_Token} */
+        const rdbToken = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Token$');
+        const ATTR = rdbToken.getAttributes();
+        const dto = modToken.composeEntity();
+        dto.type = TOKEN_TYPE + 'new';
+        dto.userRef = USER_ID;
+
+        await modToken.create({dto});
+
+        let tokens = await modToken.list();
+        assert.strictEqual(tokens.length, 2, 'The total number of listed tokens should match the created tokens.');
+
+        tokens = await modToken.list({where: {[ATTR.USER_REF]: USER_ID}});
+        assert.strictEqual(tokens.length, 2, 'The number of tokens listed should match those associated with the user ID.');
+
+        tokens = await modToken.list({where: {[ATTR.TYPE]: TOKEN_TYPE}});
+        assert.strictEqual(tokens.length, 1, 'The number of tokens listed should match those with the specified type.');
+
+        tokens = await modToken.list({where: {[ATTR.USER_REF]: USER_ID, [ATTR.TYPE]: TOKEN_TYPE}});
+        assert.strictEqual(tokens.length, 1, 'The number of tokens listed should match those with the specified user ID and type.');
     });
+
 
     it('should delete an existing user entry by user reference', async () => {
         const dto = await modToken.read({code: TOKEN_CODE});
