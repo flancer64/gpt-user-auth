@@ -1,19 +1,19 @@
 # User Registration Scenario for a Web Application via ChatGPT
 
-## General Scenario Overview
+## General Description of the Scenario
 
 ### 1. Registration Initiation
 
-- The user expresses interest in registering for the web application. ChatGPT collects the following data in a
-  conversational manner:
+- The user expresses their intent to register in the web application. ChatGPT collects the following data through a
+  conversational interface:
     - **User's email address**.
-    - **Consent to personal data processing**.
+    - **Consent to process personal data**.
     - **Preferred locale** for interacting with the application.
-    - **Passphrase**, which will be used for verifying rights to the identifier (PIN) in the future.
+    - **Passphrase**, which will be used as a PIN confirmation in the future.
 
-### 2. Data Submission
+### 2. Data Transmission
 
-- The chat sends the collected data to the web application server via the registration initiation entry point (
+- The chat sends the collected data to the web application's registration initiation endpoint (
   `Fl64_Gpt_User_Back_Web_Api_SignUp_Init`):
     - Email.
     - User consent.
@@ -23,63 +23,60 @@
 ### 3. User Registration in the Web Application
 
 - The web application validates the email address:
-    - If the email is already registered, the process is rejected, and the chat notifies the user, suggesting the
-      password recovery page.
+    - If the email is already registered, the process is rejected, and the chat notifies the user, offering a password
+      recovery page.
     - If the email is new, a user record is created with the status **"pending verification"**.
 - At this stage:
-    - A **public PIN** — the user's identifier — is generated.
-    - The PIN is saved in the database, but the user's status remains **inactive**.
-- An email with a verification token is sent to the user.
-- The PIN and a confirmation of successful registration (pending verification) are sent back to the chat.
+    - A **public PIN** is generated as the user's identifier.
+    - The PIN is stored in the database, but the user status remains **inactive**.
+- An email containing a verification token is sent to the user.
+- The PIN and confirmation of successful registration (pending verification) are sent back to the chat.
 
 ### 4. Email Verification
 
-- The user receives an email with the token and clicks the provided link.
-- Upon successful verification:
-    - The user's status is updated to **"active"**.
+- The user receives an email with a token and follows the provided link.
+- After successful verification:
+    - The user status is updated to **"active"**.
 
-### 5. Information Retained in the Chat
+### 5. Data Retained in the Chat
 
-- After the registration entry point completes successfully, the following remain in the chat:
-    - **PIN**, which is the user's public identifier.
-    - **Passphrase**, used for confirming rights to the identifier.
-- The user must remember these details for future use; otherwise, they will need to go through the account recovery
-  process.
+- After the registration process is completed, the following data remains in the chat:
+    - **PIN**, serving as the user's public identifier.
+    - **Passphrase**, used for confirming ownership of the identifier.
+- The user must remember these details for future use. Otherwise, a recovery process will be required.
 
 ### 6. Chat Access to the Web Application
 
-- After email verification, the user can fully utilize the application via the chat.
-- To access functionality through the chat, the user must provide:
+- After email verification, the user can fully access the application via chat.
+- To interact with the application through the chat, the user must provide:
     - **PIN**.
-    - **Passphrase** to confirm rights to the identifier.
-- The chat uses these details to interact with the web application on the user's behalf.
+    - **Passphrase** for identifier confirmation.
+- The chat uses this data to interact with the web application on behalf of the user.
 
 ---
 
-## End Points
+## Endpoints
 
 ### `Fl64_Gpt_User_Back_Web_Api_SignUp_Init`
 
 - **Description:**
-  Entry point accessible to ChatGPT to initiate the registration process.
-  At this stage:
+  An endpoint accessible to ChatGPT to initiate the registration process. At this stage:
     - A user record is created.
     - A PIN is generated.
-    - A verification email is sent.
+    - An email with a verification token is sent.
 
 - **Request Parameters:**
-    - `consent` (boolean, required): User consent for data processing.
+    - `consent` (boolean, required): User's consent for data processing.
     - `email` (string, required): User's email address.
-    - `locale` (string, required): User's locale.
-    - `passphrase` (string, required): Passphrase for confirming rights to the PIN.
+    - `locale` (string, required): User's preferred locale.
+    - `passphrase` (string, required): Passphrase for confirming ownership of the PIN.
 
 ### `Fl64_Gpt_User_Back_Web_Api_SignUp_Verify`
 
 - **Description:**
-  Entry point unavailable to ChatGPT for confirming the email address.
-  After confirmation:
-    - The user's status is updated to "active".
+  An endpoint inaccessible to ChatGPT, used for email verification. Upon successful verification:
+    - The user status is updated to "active".
     - The PIN becomes available for use.
 
 - **Request Parameters:**
-    - `token` (string, required): Verification token sent to the user's email.
+    - `token` (string, required): The verification token sent to the user's email.

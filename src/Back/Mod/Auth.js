@@ -5,8 +5,11 @@ import {constants as H2} from 'node:http2';
 const {
     HTTP2_HEADER_AUTHORIZATION,
 } = H2;
+
 /**
- * Class for checking Bearer token presence in the shared object of the response.
+ * Class for handling user authentication and Bearer token validation.
+ * This class provides methods for verifying the presence of an authorized Bearer token
+ * in HTTP requests and loading user details using PIN and passphrase authentication.
  */
 export default class Fl64_Gpt_User_Back_Mod_Auth {
     /**
@@ -26,10 +29,17 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         }
     ) {
         // VARS
-        /** @type {string[]} */
+        /**
+         * @type {string[]}
+         * Stores a list of allowed Bearer tokens.
+         */
         let BEARERS;
 
         // FUNCS
+        /**
+         * Retrieves the list of allowed Bearer tokens from the local configuration.
+         * @returns {string[]} List of authorized Bearer tokens.
+         */
         function getAllowedBearers() {
             if (!Array.isArray(BEARERS)) {
                 /** @type {Fl64_Gpt_User_Back_Plugin_Dto_Config_Local.Dto} */
@@ -64,6 +74,14 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
             return result;
         };
 
+        /**
+         * Loads user details based on PIN and passphrase.
+         * Verifies the passphrase hash and user status.
+         * @param {object} trx - Transaction context for database operations.
+         * @param {string} pin - User's public PIN.
+         * @param {string} passPhrase - User's passphrase for authentication.
+         * @returns {Promise<object|null>} User object if authenticated successfully, otherwise null.
+         */
         this.loadUser = async function ({trx, pin, passPhrase}) {
             let res = null;
             try {
