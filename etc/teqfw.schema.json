@@ -100,6 +100,50 @@
                 }
               }
             }
+          },
+          "package": {
+            "openai": {
+              "entity": {
+                "user": {
+                  "comment": "Registry of OpenAI ephemeral users linked to registered users.",
+                  "attr": {
+                    "user_ref": {
+                      "type": "ref",
+                      "comment": "Reference to the app user from the GPT user registry."
+                    },
+                    "code": {
+                      "type": "string",
+                      "comment": "Code associated with the OpenAI user for identification or authorization."
+                    },
+                    "date_created": {
+                      "type": "datetime",
+                      "comment": "Date and time when the OpenAI user record was created.",
+                      "default": "current"
+                    },
+                    "date_last": {
+                      "type": "datetime",
+                      "comment": "Date and time of the last interaction or update for this OpenAI user."
+                    }
+                  },
+                  "index": {
+                    "pk": {
+                      "type": "primary",
+                      "attrs": ["user_ref", "code"]
+                    }
+                  },
+                  "relation": {
+                    "user": {
+                      "attrs": ["user_ref"],
+                      "ref": {
+                        "path": "/fl64/gpt/user",
+                        "attrs": ["user_ref"]
+                      },
+                      "action": {"delete": "cascade", "update": "cascade"}
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

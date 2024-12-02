@@ -9,6 +9,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
      * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
+     * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {Fl64_Gpt_User_Back_Email_Update_Init} emailInit
@@ -19,6 +20,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
             Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
+            Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
             Fl64_Gpt_User_Back_Email_Update_Init$: emailInit,
@@ -50,6 +52,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
          * @return {Promise<void>}
          */
         this.process = async function (req, res, context) {
+            utilLog.traceOpenAi(context?.request);
             // Check for authorization
             if (!modAuth.hasBearerInRequest(context?.request)) {
                 respond403(context?.response);

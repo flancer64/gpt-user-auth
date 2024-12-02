@@ -7,6 +7,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
      * @param {Fl64_Gpt_User_Shared_Web_Api_Test_Email} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
+     * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {TeqFw_Email_Back_Act_Send} actSend
      */
@@ -16,6 +17,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
             'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
             Fl64_Gpt_User_Shared_Web_Api_Test_Email$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
+            Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             TeqFw_Email_Back_Act_Send$: actSend,
         }
@@ -45,6 +47,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
          * @returns {Promise<void>}
          */
         this.process = async function (req, res, context) {
+            utilLog.traceOpenAi(context?.request);
             // Ensure the request is authorized
             if (!modAuth.hasBearerInRequest(context?.request)) {
                 respond403(context?.response);

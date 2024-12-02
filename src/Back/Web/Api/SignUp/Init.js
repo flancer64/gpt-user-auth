@@ -14,6 +14,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
      * @param {Fl64_Gpt_User_Shared_Web_Api_SignUp_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
+     * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {Fl64_Gpt_User_Back_Email_SignUp_Init} emailSignUp
@@ -25,6 +26,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
             'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
             Fl64_Gpt_User_Shared_Web_Api_SignUp_Init$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
+            Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
             Fl64_Gpt_User_Back_Email_SignUp_Init$: emailSignUp,
@@ -47,6 +49,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
          * @returns {Promise<void>}
          */
         this.process = async function (req, res, context) {
+            utilLog.traceOpenAi(context?.request);
             if (modAuth.hasBearerInRequest(context?.request)) {
                 const rs = endpoint.createRes();
                 rs.resultCode = CODE.SERVER_ERROR;
