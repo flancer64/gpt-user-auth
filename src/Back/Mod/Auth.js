@@ -62,7 +62,7 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
             let result = false;
             try {
                 const oaiUserHeader = req?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
-                if (!oaiUserHeader) {
+                if (oaiUserHeader) {
                     const authHeader = req?.headers[HTTP2_HEADER_AUTHORIZATION];
                     if (authHeader && authHeader.startsWith('Bearer ')) {
                         const bearerToken = authHeader.slice(7); // Remove 'Bearer ' prefix

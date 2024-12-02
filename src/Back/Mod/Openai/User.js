@@ -32,11 +32,10 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
          *
          * @param {TeqFw_Db_Back_RDb_ITrans} trx - The transaction context.
          * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User.Dto} dbUser - The user data to be persisted.
-         * @returns {Promise<{id: number}>} - The identifier of the newly created user.
+         * @returns {Promise<{}>} - The identifier of the newly created user.
          */
         async function createEntity({trx, dbUser}) {
-            await crud.create(trx, rdbUser, dbUser);
-            return {id: dbUser.user_ref};
+            return await crud.create(trx, rdbUser, dbUser);
         }
 
         /**
@@ -73,10 +72,10 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
          *
          * @param {TeqFw_Db_Back_RDb_ITrans} trx - The transaction context.
          * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User.Dto} dbUser - The user data to update.
-         * @returns {Promise<void>}
+         * @returns {Promise<number>}
          */
         async function updateEntity({trx, dbUser}) {
-            await crud.updateOne(trx, rdbUser, dbUser);
+            return await crud.updateOne(trx, rdbUser, dbUser);
         }
 
         // MAIN
@@ -107,12 +106,15 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 const {dbUser} = convUser.dom2db({user: dto});
-                const {id} = await createEntity({trx: trxLocal, dbUser});
+                const {[ATTR.USER_REF]: userRef, [ATTR.EPHEMERAL_ID]: ephemeralId} = await createEntity({
+                    trx: trxLocal,
+                    dbUser
+                });
 
                 const {dbUser: createdUser} = await readEntity({
                     trx: trxLocal,
-                    userRef: id,
-                    ephemeralId: dto.ephemeralId
+                    userRef,
+                    ephemeralId
                 });
                 const res = convUser.db2dom({dbUser: createdUser});
                 if (!trx) await trxLocal.commit();
@@ -264,26 +266,27 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
          * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Optional transaction context.
          * @param {number} userRef - The reference ID of the user.
          * @param {string} ephemeralId - The ephemeral identifier of the user.
-         * @returns {Promise<Fl64_Gpt_User_Shared_Dto_Openai_User.Dto|null>}
+         * @returns {Promise<void>}
          * @throws {Error} If the update process fails.
          */
         this.updateDateLast = async function ({trx, userRef, ephemeralId}) {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 if (userRef && ephemeralId) {
-                    const dbUser = rdbUser.createDto();
+                    let dbUser = rdbUser.createDto();
                     dbUser.ephemeral_id = ephemeralId;
                     dbUser.date_last = new Date();
                     dbUser.user_ref = userRef;
-                    await updateEntity({trx: trxLocal, dbUser});
-                    logger.info(`Last action date updated for OpenAI user with ID: ${dbUser.user_ref}.`);
-                    const res = convUser.db2dom({dbUser});
+                    const updated = await updateEntity({trx: trxLocal, dbUser});
+                    if (!updated) {
+                        await createEntity({trx: trxLocal, dbUser});
+                    } else {
+                        logger.info(`Last action date updated for OpenAI user with ID: ${dbUser.user_ref}.`);
+                    }
                     if (!trx) await trxLocal.commit();
-                    return res;
                 } else {
                     logger.info(`Cannot update last action date: Missing userRef or ephemeralId.`);
                     if (!trx) await trxLocal.commit();
-                    return null;
                 }
             } catch (error) {
                 if (!trx) await trxLocal.rollback();
