@@ -5,6 +5,10 @@ export default class Fl64_Gpt_User_Back_Defaults {
     EMAIL_SIGN_UP = 'SignUp';
     EMAIL_UPDATE = 'Update';
 
+    HTTP_HEAD_OPENAI_CONVERSATION_ID = 'openai-conversation-id';
+    HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID = 'openai-ephemeral-user-id';
+    HTTP_HEAD_OPENAI_GPT_ID = 'openai-gpt-id';
+
     /**
      * Default locale for emails in this plugin.
      * @type {string}

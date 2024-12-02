@@ -111,7 +111,7 @@
                       "type": "ref",
                       "comment": "Reference to the app user from the GPT user registry."
                     },
-                    "code": {
+                    "ephemeral_id": {
                       "type": "string",
                       "comment": "Code associated with the OpenAI user for identification or authorization."
                     },
@@ -122,13 +122,14 @@
                     },
                     "date_last": {
                       "type": "datetime",
-                      "comment": "Date and time of the last interaction or update for this OpenAI user."
+                      "comment": "Date and time of the last interaction or update for this OpenAI user.",
+                      "default": "current"
                     }
                   },
                   "index": {
                     "pk": {
                       "type": "primary",
-                      "attrs": ["user_ref", "code"]
+                      "attrs": ["user_ref", "ephemeral_id"]
                     }
                   },
                   "relation": {

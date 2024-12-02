@@ -10,9 +10,9 @@ const DEF = await container.get('Fl64_Gpt_User_Back_Defaults$');
 describe('Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User', () => {
     const ATTR = rdbDto.getAttributes();
     const expectedProperties = [
-        'code',
         'date_created',
         'date_last',
+        'ephemeral_id',
         'user_ref',
     ];
 
@@ -44,6 +44,6 @@ describe('Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User', () => {
 
     it('should have the correct ENTITY name and primary key', async () => {
         assert.equal(rdbDto.getEntityName(), `${DEF.NAME}/fl64/gpt/openai/user`, 'Entity name should match the expected path');
-        assert.deepStrictEqual(rdbDto.getPrimaryKey(), [ATTR.USER_REF, ATTR.CODE], 'Primary key should be set to USER_REF and CODE');
+        assert.deepStrictEqual(rdbDto.getPrimaryKey(), [ATTR.USER_REF, ATTR.EPHEMERAL_ID], 'Primary key should be set to USER_REF and CODE');
     });
 });

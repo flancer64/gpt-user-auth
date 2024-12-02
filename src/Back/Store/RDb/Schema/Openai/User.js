@@ -15,9 +15,9 @@ const ENTITY = '/fl64/gpt/openai/user';
  * @type {Object}
  */
 const ATTR = {
-    CODE: 'code',
     DATE_CREATED: 'date_created',
     DATE_LAST: 'date_last',
+    EPHEMERAL_ID: 'ephemeral_id',
     USER_REF: 'user_ref',
 };
 Object.freeze(ATTR);
@@ -27,13 +27,6 @@ Object.freeze(ATTR);
  * @memberOf Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User
  */
 class Dto {
-    /**
-     * Code associated with the OpenAI user for identification or authorization.
-     *
-     * @type {string}
-     */
-    code;
-
     /**
      * The date when the OpenAI user record was created.
      *
@@ -47,6 +40,13 @@ class Dto {
      * @type {Date}
      */
     date_last;
+
+    /**
+     * Code associated with the OpenAI user for identification or authorization.
+     *
+     * @type {string}
+     */
+    ephemeral_id;
 
     /**
      * Reference to the main user in the application.
@@ -82,9 +82,9 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User {
          */
         this.createDto = function (data) {
             const res = new Dto();
-            res.code = cast.string(data?.code);
             res.date_created = cast.date(data?.date_created);
             res.date_last = cast.date(data?.date_last);
+            res.ephemeral_id = cast.string(data?.ephemeral_id);
             res.user_ref = cast.int(data?.user_ref);
             return res;
         };
@@ -100,7 +100,7 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User {
         return base.create(this,
             `${DEF.NAME}${ENTITY}`,
             ATTR,
-            [ATTR.USER_REF, ATTR.CODE],
+            [ATTR.USER_REF, ATTR.EPHEMERAL_ID],
             Dto
         );
     }

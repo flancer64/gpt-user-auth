@@ -16,14 +16,8 @@
   },
   "repository": "github:flancer64/gpt-user-auth",
   "scripts": {
-    "db-init": "node ./bin/tequila.mjs db-init",
-    "db-reset": "node ./bin/tequila.mjs db-export -f ./var/data.json && node ./bin/tequila.mjs db-init && node ./bin/tequila.mjs db-import -f ./var/data.json ",
-    "help": "node ./bin/tequila.mjs -h",
-    "start": "node ./bin/tequila.mjs web-server-start",
-    "stop": "node ./bin/tequila.mjs web-server-stop",
     "test:accept": "mocha ./test/accept --recursive",
-    "test:unit": "mocha ./test/unit --recursive",
-    "version": "node ./bin/tequila.mjs core-version"
+    "test:unit": "mocha ./test/unit --recursive"
   },
   "dependencies": {
     "@teqfw/db": ">=0.22.1 <1.0.0",

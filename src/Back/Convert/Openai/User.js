@@ -24,7 +24,7 @@ export default class Fl64_Gpt_User_Back_Convert_Openai_User {
          */
         this.db2dom = function ({dbUser}) {
             const res = domDto.createDto();
-            res.code = cast.string(dbUser?.code);
+            res.ephemeralId = cast.string(dbUser?.ephemeral_id);
             res.dateCreated = cast.date(dbUser?.date_created);
             res.dateLast = cast.date(dbUser?.date_last);
             res.userRef = cast.int(dbUser?.user_ref);
@@ -45,7 +45,7 @@ export default class Fl64_Gpt_User_Back_Convert_Openai_User {
          */
         this.dom2db = function ({user}) {
             const dbUser = rdbDto.createDto();
-            dbUser.code = cast.string(user?.code);
+            dbUser.ephemeral_id = cast.string(user?.ephemeralId);
             dbUser.date_created = cast.date(user?.dateCreated);
             dbUser.date_last = cast.date(user?.dateLast);
             dbUser.user_ref = cast.int(user?.userRef);

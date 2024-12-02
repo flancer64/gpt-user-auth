@@ -27,7 +27,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Test_Email - Acceptance Tests', () => {
         // ENV SETUP
         /** @type {Fl64_Gpt_User_Back_Mod_Auth} */
         const modAuth = await container.get('Fl64_Gpt_User_Back_Mod_Auth$');
-        modAuth.hasBearerInRequest = () => true;
+        modAuth.isValidRequest = () => true;
         modAuth.loadUser = () => ({id: 12});
         /** @type {TeqFw_Email_Back_Act_Send} */
         const actSend = await container.get('TeqFw_Email_Back_Act_Send$');
@@ -44,7 +44,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Test_Email - Acceptance Tests', () => {
         // ENV SETUP
         /** @type {Fl64_Gpt_User_Back_Mod_Auth} */
         const modAuth = await container.get('Fl64_Gpt_User_Back_Mod_Auth$');
-        modAuth.hasBearerInRequest = () => true;
+        modAuth.isValidRequest = () => true;
         modAuth.loadUser = () => null;
 
         // test the service
@@ -58,7 +58,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Test_Email - Acceptance Tests', () => {
         // ENV SETUP
         /** @type {Fl64_Gpt_User_Back_Mod_Auth} */
         const modAuth = await container.get('Fl64_Gpt_User_Back_Mod_Auth$');
-        modAuth.hasBearerInRequest = () => true;
+        modAuth.isValidRequest = () => true;
         modAuth.loadUser = () => ({id: 12});
         /** @type {TeqFw_Email_Back_Act_Send} */
         const actSend = await container.get('TeqFw_Email_Back_Act_Send$');

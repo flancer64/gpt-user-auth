@@ -2,7 +2,7 @@ import {createContainer} from '@teqfw/test';
 import assert from 'node:assert';
 
 const container = await createContainer();
-
+/** @type {Fl64_Gpt_User_Back_Mod_Auth} */
 const modAuth = await container.get('Fl64_Gpt_User_Back_Mod_Auth$');
 
 const TOKEN = 'valid-token';
@@ -21,7 +21,7 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
             },
         };
 
-        const result = modAuth.hasBearerInRequest(req);
+        const result = modAuth.isValidRequest(req);
         assert.strictEqual(result, true, 'Expected true for a valid Bearer token');
     });
 
@@ -31,7 +31,7 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
                 authorization: 'Bearer invalid-token',
             },
         };
-        const result = modAuth.hasBearerInRequest(req);
+        const result = modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false for an invalid Bearer token');
     });
 
@@ -39,7 +39,7 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
         const req = {
             headers: {},
         };
-        const result = modAuth.hasBearerInRequest(req);
+        const result = modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false if no Bearer token is provided');
     });
 

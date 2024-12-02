@@ -8,11 +8,6 @@
  */
 class Dto {
     /**
-     * Code associated with the OpenAI user for identification or authorization.
-     * @type {string}
-     */
-    code;
-    /**
      * Date and time when the OpenAI user record was created.
      * @type {Date}
      */
@@ -22,6 +17,11 @@ class Dto {
      * @type {Date}
      */
     dateLast;
+    /**
+     * Code associated with the OpenAI user for identification or authorization.
+     * @type {string}
+     */
+    ephemeralId;
     /**
      * Reference to the main user in the application.
      * @type {number}
@@ -52,9 +52,9 @@ export default class Fl64_Gpt_User_Shared_Dto_Openai_User {
             const res = Object.assign(new Dto(), data);
 
             // Cast known attributes
-            res.code = cast.string(data?.code);
             res.dateCreated = cast.date(data?.dateCreated);
             res.dateLast = cast.date(data?.dateLast);
+            res.ephemeralId = cast.string(data?.ephemeralId);
             res.userRef = cast.int(data?.userRef);
 
             return res;

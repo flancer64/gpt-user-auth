@@ -118,7 +118,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Save', () => {
             assert.strictEqual(updatedDto.passHash, hash);
 
             // Verify the token was deleted
-            const foundToken = await modToken.read({code: TOKEN});
+            const foundToken = await modToken.read({ephemeralId: TOKEN});
             assert.strictEqual(foundToken, null);
         });
 

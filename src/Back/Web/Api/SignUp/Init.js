@@ -10,6 +10,7 @@ import {randomUUID} from 'crypto';
  */
 export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
     /**
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
      * @param {Fl64_Gpt_User_Shared_Web_Api_SignUp_Init} endpoint
@@ -17,11 +18,13 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
+     * @param {Fl64_Gpt_User_Back_Mod_Openai_User} modOaiUser
      * @param {Fl64_Gpt_User_Back_Email_SignUp_Init} emailSignUp
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN
      */
     constructor(
         {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
             Fl64_Gpt_User_Shared_Web_Api_SignUp_Init$: endpoint,
@@ -29,6 +32,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Gpt_User_Back_Mod_Openai_User$: modOaiUser,
             Fl64_Gpt_User_Back_Email_SignUp_Init$: emailSignUp,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN,
         }
@@ -50,7 +54,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
          */
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
-            if (modAuth.hasBearerInRequest(context?.request)) {
+            if (modAuth.isValidRequest(context?.request)) {
                 const rs = endpoint.createRes();
                 rs.resultCode = CODE.SERVER_ERROR;
                 rs.instructions = `
@@ -84,6 +88,10 @@ refer to the application's privacy policy or contact support for assistance.
                             dto.passHash = modUser.hashPassPhrase({passPhrase, salt: dto.passSalt});
                             const createdUser = await modUser.create({trx, dto});
                             if (createdUser) {
+                                const dtoOaiUser = modOaiUser.composeEntity();
+                                dtoOaiUser.userRef = createdUser.userRef;
+                                dtoOaiUser.ephemeralId = context.request.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
+                                await modOaiUser.create({trx, dto: dtoOaiUser});
                                 await emailSignUp.execute({
                                     trx,
                                     userId: createdUser.userRef,

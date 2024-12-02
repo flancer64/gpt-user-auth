@@ -3,22 +3,26 @@
  */
 export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
     /**
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
      * @param {Fl64_Gpt_User_Shared_Web_Api_Test_Email} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
+     * @param {Fl64_Gpt_User_Back_Mod_Openai_User} modOaiUser
      * @param {TeqFw_Email_Back_Act_Send} actSend
      */
     constructor(
         {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
             Fl64_Gpt_User_Shared_Web_Api_Test_Email$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
+            Fl64_Gpt_User_Back_Mod_Openai_User$: modOaiUser,
             TeqFw_Email_Back_Act_Send$: actSend,
         }
     ) {
@@ -49,7 +53,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
             // Ensure the request is authorized
-            if (!modAuth.hasBearerInRequest(context?.request)) {
+            if (!modAuth.isValidRequest(context?.request)) {
                 respond403(context?.response);
                 return;
             }
@@ -78,6 +82,10 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
                         subject: emailSubject,
                         text: emailContent,
                     });
+
+                    // Update the last date
+                    const ephemeralId = context?.request?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
+                    await modOaiUser.updateDateLast({trx, userRef: foundUser.userRef, ephemeralId});
 
                     resultCode = emailSent.success ? CODE.SUCCESS : CODE.SERVICE_ERROR;
                     rs.message = resultCode === CODE.SUCCESS

@@ -5,6 +5,7 @@
  */
 export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
     /**
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
@@ -12,10 +13,12 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
+     * @param {Fl64_Gpt_User_Back_Mod_Openai_User} modOaiUser
      * @param {Fl64_Gpt_User_Back_Email_Update_Init} emailInit
      */
     constructor(
         {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
@@ -23,6 +26,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Gpt_User_Back_Mod_Openai_User$: modOaiUser,
             Fl64_Gpt_User_Back_Email_Update_Init$: emailInit,
         }
     ) {
@@ -54,7 +58,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
             // Check for authorization
-            if (!modAuth.hasBearerInRequest(context?.request)) {
+            if (!modAuth.isValidRequest(context?.request)) {
                 respond403(context?.response);
                 return;
             }
@@ -86,6 +90,11 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
                             userId: found.userRef,
                         })
                         .catch(logger.exception);
+
+                    // Update the last date
+                    const ephemeralId = context?.request?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
+                    await modOaiUser.updateDateLast({trx, userRef: found.userRef, ephemeralId});
+
 
                     logger.info(`Profile update link sent to user with ID: ${found.userRef}.`);
                 } else {

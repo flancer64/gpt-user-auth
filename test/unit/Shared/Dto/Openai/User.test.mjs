@@ -7,9 +7,9 @@ const domDto = await container.get('Fl64_Gpt_User_Shared_Dto_Openai_User$');
 
 describe('Fl64_Gpt_User_Shared_Dto_Openai_User', () => {
     const expectedProperties = [
-        'code',
         'dateCreated',
         'dateLast',
+        'ephemeralId',
         'userRef',
     ];
 

@@ -15,6 +15,8 @@ const crud = await container.get('TeqFw_Db_Back_Api_RDb_CrudEngine$');
 const rdbToken = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Token$');
 /** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_User} */
 const rdbUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_User$');
+/** @type {Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User} */
+const rdbOaiUser = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
 const STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
 
@@ -79,5 +81,24 @@ describe('RDb schema', () => {
         }
         // Assertion
         assert.strictEqual(pk[ATTR.CODE], CODE);
+    });
+    it('should create a OpenaAI user', async () => {
+        let pk;
+        const OAI_USER_ID = 'some-id-for-the-user';
+        const ATTR = rdbOaiUser.getAttributes();
+        const trx = await conn.startTransaction();
+        try {
+            const dto = rdbOaiUser.createDto();
+            dto.ephemeral_id = OAI_USER_ID;
+            dto.user_ref = USER_ID;
+            pk = await crud.create(trx, rdbOaiUser, dto);
+            await trx.commit();
+        } catch (e) {
+            await trx.rollback();
+            logger.exception(e);
+        }
+        // Assertion
+        assert.strictEqual(pk[ATTR.EPHEMERAL_ID], OAI_USER_ID);
+        assert.strictEqual(pk[ATTR.USER_REF], USER_ID);
     });
 });

@@ -7,15 +7,15 @@ const {
 } = H2;
 
 /**
- * Class for handling user authentication and Bearer token validation.
- * This class provides methods for verifying the presence of an authorized Bearer token
- * in HTTP requests and loading user details using PIN and passphrase authentication.
+ * Handles user authentication and Bearer token validation.
+ * Provides methods to verify authorized Bearer tokens in HTTP requests
+ * and to authenticate users using PIN and passphrase.
  */
 export default class Fl64_Gpt_User_Back_Mod_Auth {
     /**
      * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Back_Config} config
-     * @param {TeqFw_Core_Shared_Api_Logger} logger - Logger instance.
+     * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS
      */
@@ -31,14 +31,15 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         // VARS
         /**
          * @type {string[]}
-         * Stores a list of allowed Bearer tokens.
+         * List of authorized Bearer tokens.
          */
         let BEARERS;
 
         // FUNCS
         /**
-         * Retrieves the list of allowed Bearer tokens from the local configuration.
-         * @returns {string[]} List of authorized Bearer tokens.
+         * Retrieves the authorized Bearer tokens from the local configuration.
+         * Initializes the BEARERS array if it hasn't been loaded yet.
+         * @returns {string[]} Authorized Bearer tokens.
          */
         function getAllowedBearers() {
             if (!Array.isArray(BEARERS)) {
@@ -50,23 +51,30 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         }
 
         // MAIN
+
         /**
-         * Checks if the HTTP request contains a valid Bearer token.
-         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req
-         * @returns {boolean} True if the Bearer token is present and is authorized; otherwise, false.
+         * Validates the presence and authorization of a Bearer token in the HTTP request.
+         * Ensures that either the OpenAI ephemeral user ID header is present or a valid Bearer token is provided.
+         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - The incoming HTTP request.
+         * @returns {boolean} True if the request is authorized; otherwise, false.
          */
-        this.hasBearerInRequest = function (req) {
+        this.isValidRequest = function (req) {
             let result = false;
             try {
-                const authHeader = req?.headers[HTTP2_HEADER_AUTHORIZATION];
-                if (authHeader && authHeader.startsWith('Bearer ')) {
-                    const bearerToken = authHeader.slice(7); // Remove 'Bearer ' prefix
-                    const allowed = getAllowedBearers();
-                    if (allowed.includes(bearerToken)) {
-                        result = true;
-                    } else {
-                        logger.error(`Failed to authorize request. Invalid Bearer token: '${bearerToken}'.`);
+                const oaiUserHeader = req?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
+                if (!oaiUserHeader) {
+                    const authHeader = req?.headers[HTTP2_HEADER_AUTHORIZATION];
+                    if (authHeader && authHeader.startsWith('Bearer ')) {
+                        const bearerToken = authHeader.slice(7); // Remove 'Bearer ' prefix
+                        const allowed = getAllowedBearers();
+                        if (allowed.includes(bearerToken)) {
+                            result = true;
+                        } else {
+                            logger.error(`Authorization failed: Invalid Bearer token '${bearerToken}'.`);
+                        }
                     }
+                } else {
+                    logger.error(`Authorization failed: Missing OpenAI ephemeral user ID header.`);
                 }
             } catch (e) {
                 logger.exception(e);
@@ -75,12 +83,12 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         };
 
         /**
-         * Loads user details based on PIN and passphrase.
-         * Verifies the passphrase hash and user status.
+         * Authenticates a user using their PIN and passphrase.
+         * Verifies the passphrase against the stored hash and checks if the user status is active.
          * @param {object} trx - Transaction context for database operations.
-         * @param {string} pin - User's public PIN.
-         * @param {string} passPhrase - User's passphrase for authentication.
-         * @returns {Promise<object|null>} User object if authenticated successfully, otherwise null.
+         * @param {string} pin - The user's public PIN.
+         * @param {string} passPhrase - The user's passphrase for authentication.
+         * @returns {Promise<object|null>} The authenticated user object if successful; otherwise, null.
          */
         this.loadUser = async function ({trx, pin, passPhrase}) {
             let res = null;
@@ -97,7 +105,6 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
             }
             return res;
         };
-
 
     }
 }

@@ -10,19 +10,17 @@ const rdbDto = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_U
 const converter = await container.get('Fl64_Gpt_User_Back_Convert_Openai_User$');
 
 describe('Fl64_Gpt_User_Back_Convert_Openai_User', () => {
-    const sampleRdbDto = rdbDto.createDto({
-        code: 'auth_code_123',
-        date_created: new Date('2023-01-01T00:00:00Z'),
-        date_last: new Date('2023-01-02T00:00:00Z'),
-        user_ref: 42
-    });
+    const sampleRdbDto = rdbDto.createDto();
+    sampleRdbDto.date_created = new Date('2023-01-01T00:00:00Z');
+    sampleRdbDto.date_last = new Date('2023-01-02T00:00:00Z');
+    sampleRdbDto.ephemeral_id = 'auth_code_123';
+    sampleRdbDto.user_ref = 42;
 
-    const sampleDomDto = domDto.createDto({
-        code: 'auth_code_123',
-        dateCreated: new Date('2023-01-01T00:00:00Z'),
-        dateLast: new Date('2023-01-02T00:00:00Z'),
-        userRef: 42
-    });
+    const sampleDomDto = domDto.createDto();
+    sampleDomDto.dateCreated = new Date('2023-01-01T00:00:00Z');
+    sampleDomDto.dateLast = new Date('2023-01-02T00:00:00Z');
+    sampleDomDto.ephemeralId = 'auth_code_123';
+    sampleDomDto.userRef = 42;
 
     it('should convert RDB DTO to Domain DTO correctly', () => {
         const domDto = converter.db2dom({dbUser: sampleRdbDto});
