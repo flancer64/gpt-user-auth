@@ -18,6 +18,12 @@
             <input id="email" name="email" type="email" readonly>
         </div>
 
+        <!-- PIN (Read-Only) -->
+        <div class="form-group">
+            <label for="pin">PIN</label>
+            <input id="pin" name="pin" type="number" readonly>
+        </div>
+
         <!-- Date Created (Read-Only) -->
         <div class="form-group">
             <label for="dateCreated">Date Created</label>
@@ -52,7 +58,7 @@
     /**
      * Fetches user profile data from the server.
      * @param {string} token - Access token for fetching profile data.
-     * @returns {Promise<Object|null>} - User profile data or null on failure.
+     * @returns {Promise<Fl64_Gpt_User_Shared_Web_Api_Update_Load.Response|null>} - User profile data or null on failure.
      */
     async function fetchUserData({token}) {
         const url = '/web-api-service/Fl64_Gpt_User_Shared_Web_Api_Update_Load';
@@ -97,7 +103,7 @@
 
     /**
      * Formats an ISO date string to "YYYY/MM/DD HH:MM:SS".
-     * @param {string} dateString - ISO date string.
+     * @param {string|Date} dateString - ISO date string.
      * @returns {string} - Formatted date string.
      */
     function formatDate(dateString) {
@@ -126,10 +132,11 @@
         const profileData = await fetchUserData({token});
         if (profileData?.email) {
             // Populate form fields
-            form.querySelector('#email').value = profileData.email || '';
             form.querySelector('#dateCreated').value = formatDate(profileData.dateCreated);
-            form.querySelector('#status').value = profileData.status || '';
+            form.querySelector('#email').value = profileData.email || '';
             form.querySelector('#locale').value = profileData.locale || '';
+            form.querySelector('#pin').value = profileData.pin || '';
+            form.querySelector('#status').value = profileData.status || '';
 
             // Show form and hide loader
             loader.style.display = 'none';
