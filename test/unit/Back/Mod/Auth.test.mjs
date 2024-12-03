@@ -4,8 +4,11 @@ import assert from 'node:assert';
 const container = await createContainer();
 /** @type {Fl64_Gpt_User_Back_Mod_Auth} */
 const modAuth = await container.get('Fl64_Gpt_User_Back_Mod_Auth$');
+/** @type {Fl64_Gpt_User_Back_Defaults} */
+const DEF = await container.get('Fl64_Gpt_User_Back_Defaults$');
 
 const TOKEN = 'valid-token';
+const OAI_USER_ID = 'oai-user-id';
 
 describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
 
@@ -14,21 +17,33 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
         config.getLocal = () => ({authBearerTokens: [TOKEN]});
     });
 
-    it('should return true for a valid Bearer token', () => {
+    it('should return true for a valid Bearer token and user ID from Open AI', () => {
         const req = {
             headers: {
                 authorization: `Bearer ${TOKEN}`,
+                [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID,
             },
         };
 
         const result = modAuth.isValidRequest(req);
-        assert.strictEqual(result, true, 'Expected true for a valid Bearer token');
+        assert.strictEqual(result, true, 'Expected true for a valid Bearer token and user ID from Open AI');
+    });
+
+    it('should return false if Open AI header is missed', () => {
+        const req = {
+            headers: {
+                authorization: `Bearer ${TOKEN}`
+            },
+        };
+        const result = modAuth.isValidRequest(req);
+        assert.strictEqual(result, false, 'Expected false for missed Open AI header');
     });
 
     it('should return false for an invalid Bearer token', () => {
         const req = {
             headers: {
                 authorization: 'Bearer invalid-token',
+                [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID,
             },
         };
         const result = modAuth.isValidRequest(req);
@@ -37,7 +52,9 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
 
     it('should return false if no Bearer token is provided', () => {
         const req = {
-            headers: {},
+            headers: {
+                [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID,
+            },
         };
         const result = modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false if no Bearer token is provided');
