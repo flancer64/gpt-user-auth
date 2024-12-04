@@ -1,22 +1,39 @@
 /**
- * DTO for initiating the user sign-up process.
+ * DTOs for initiating the user sign-up process in the web application.
+ * This service collects user-provided data (email, consent, locale, and passphrase),
+ * validates the email, and creates a user record with a "pending verification" status.
+ * A PIN is generated, and an email with a verification token is sent to the user.
+ *
  * @namespace Fl64_Gpt_User_Shared_Web_Api_SignUp_Init
  */
+
 // VARS
 /**
+ * Result codes for the user sign-up initiation process.
+ *
  * @memberOf Fl64_Gpt_User_Shared_Web_Api_SignUp_Init
+ * @enum {string}
  */
 const RESULT_CODE = {
+    /** User's consent for data processing is required. */
     CONSENT_REQUIRED: 'CONSENT_REQUIRED',
+
+    /** The provided email address is already registered. */
     EMAIL_ALREADY_REGISTERED: 'EMAIL_ALREADY_REGISTERED',
+
+    /** A server error occurred during the registration process. */
     SERVER_ERROR: 'SERVER_ERROR',
+
+    /** The sign-up process completed successfully. */
     SUCCESS: 'SUCCESS',
 };
 Object.freeze(RESULT_CODE);
 
+
 // CLASSES
 /**
  * Request structure for initiating user registration.
+ *
  * @memberOf Fl64_Gpt_User_Shared_Web_Api_SignUp_Init
  */
 class Request {
@@ -32,12 +49,12 @@ class Request {
     email;
 
     /**
-     * Consent flag indicating user's explicit agreement to data processing.
-     * Registration cannot proceed without user consent.
+     * Consent flag indicating the user's explicit agreement to data processing.
+     * This flag must be set to `true` for the registration process to proceed.
+     * Sending a request with `isConsent=false` is invalid and will be rejected.
      *
      * @type {boolean}
-     * @example true // User has agreed to the data processing terms.
-     * @example false // User has not agreed; registration should not proceed.
+     * @example true // The user has agreed to the data processing terms.
      */
     isConsent;
 
@@ -66,18 +83,19 @@ class Request {
     passPhrase;
 }
 
+
 /**
  * Response structure for confirming the initiation of the registration process.
- * This class represents the data returned to the client after calling the
- * Fl64_Gpt_User_Shared_Web_Api_SignUp_Init endpoint.
+ * Returned by the Fl64_Gpt_User_Shared_Web_Api_SignUp_Init endpoint.
  *
  * @memberOf Fl64_Gpt_User_Shared_Web_Api_SignUp_Init
  */
 class Response {
     /**
      * Instructions for the user on the next steps to complete the registration process.
-     * This property typically includes guidance on verifying their email and
-     * securing their account.
+     * Typically includes guidance for email verification and securing the account.
+     * The instructions are in English by default but must be translated into the user's preferred language
+     * as specified during the registration process.
      *
      * @type {string}
      * @example "Please verify your email address by clicking the link we sent to your email."
@@ -85,24 +103,25 @@ class Response {
     instructions;
 
     /**
-     * A unique PIN code assigned to the user as their identifier.
-     * The PIN code is generated during the registration process and will remain inactive
-     * until the user's email address is verified. Users will use this PIN code in combination
-     * with their passphrase for authentication.
+     * A unique PIN code assigned to the user during registration.
+     * The PIN remains inactive until the user's email is verified.
+     * Users will use this PIN along with their passphrase for authentication.
+     * The chat must store both the PIN and the passphrase for future user authentication.
      *
      * @type {number}
-     * @example "123456"
+     * @example 123456
      */
     pin;
 
     /**
-     * Result code indicating the outcome of the registration initiation.
+     * Result code indicating the outcome of the registration initiation process.
      *
      * @type {string}
      * @see Fl64_Gpt_User_Shared_Web_Api_SignUp_Init.RESULT_CODE
      */
     resultCode;
 }
+
 
 /**
  * @implements TeqFw_Web_Api_Shared_Api_Endpoint
