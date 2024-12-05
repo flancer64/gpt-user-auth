@@ -14,7 +14,7 @@
     "/web-api-service/Fl64_Gpt_User_Shared_Web_Api_SignUp_Init": {
       "post": {
         "summary": "Initialize user sign-up",
-        "description": "Starts the user sign-up process by collecting the user's email, consent for data processing, preferred locale, and passphrase. It creates a user record with a 'pending verification' status, generates a unique PIN, and sends an email verification token. The PIN and passphrase must be securely stored by the client for future authentication.",
+        "description": "Begins user sign-up by collecting email, consent, locale, and passphrase. Creates a user record with 'pending verification' status, generates a PIN, and sends an email verification token. PIN and passphrase must be securely stored by the client.",
         "security": [
           {
             "bearerAuth": []
