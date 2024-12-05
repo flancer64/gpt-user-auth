@@ -1,25 +1,37 @@
 /**
- * Model for managing OpenAI user data in the relational database.
+ * Manages OpenAI user data in a relational database.
+ *
+ * This model provides CRUD operations for OpenAI user records,
+ * including transaction-safe creation, retrieval, updating, and deletion of user entities.
+ * It also handles domain-to-database conversion and vice versa,
+ * and supports filtering and listing of user records by various criteria.
+ *
+ * Dependencies include a logger, database connection, CRUD engine,
+ * and data converters for seamless integration between domain and database layers.
  *
  * @implements TeqFw_Core_Shared_Api_Model
  */
 export default class Fl64_Gpt_User_Back_Mod_Openai_User {
     /**
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Shared_Dto_Openai_User} dtoUser
      * @param {Fl64_Gpt_User_Back_Convert_Openai_User} convUser
      * @param {TeqFw_Db_Back_Api_RDb_CrudEngine} crud
      * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User} rdbUser
+     * @param {Fl64_Gpt_User_Back_Mod_User} modUserBase
      */
     constructor(
         {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Shared_Dto_Openai_User$: dtoUser,
             Fl64_Gpt_User_Back_Convert_Openai_User$: convUser,
             TeqFw_Db_Back_Api_RDb_CrudEngine$: crud,
             Fl64_Gpt_User_Back_Store_RDb_Schema_Openai_User$: rdbUser,
+            Fl64_Gpt_User_Back_Mod_User$: modUserBase,
         }
     ) {
         // VARS
@@ -265,21 +277,26 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
          *
          * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Optional transaction context.
          * @param {number} userRef - The reference ID of the user.
-         * @param {string} ephemeralId - The ephemeral identifier of the user.
+         * @param {string} [ephemeralId] - The ephemeral identifier of the user (optional).
+         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} [httpRequest] - The HTTP request object (optional).
          * @returns {Promise<void>}
          * @throws {Error} If the update process fails.
          */
-        this.updateDateLast = async function ({trx, userRef, ephemeralId}) {
+        this.updateDateLast = async function ({trx, userRef, ephemeralId, httpRequest}) {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
-                if (userRef && ephemeralId) {
+                // Attempt to retrieve ephemeralId from HTTP request headers if not provided
+                const finalEphemeralId = ephemeralId ?? httpRequest?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
+
+                if (userRef && finalEphemeralId) {
                     let dbUser = rdbUser.createDto();
-                    dbUser.ephemeral_id = ephemeralId;
+                    dbUser.ephemeral_id = finalEphemeralId;
                     dbUser.date_last = new Date();
                     dbUser.user_ref = userRef;
                     const updated = await updateEntity({trx: trxLocal, dbUser});
                     if (!updated) {
-                        await createEntity({trx: trxLocal, dbUser});
+                        const found = await modUserBase.read({trx: trxLocal, userRef});
+                        if (found) await createEntity({trx: trxLocal, dbUser});
                     } else {
                         logger.info(`Last action date updated for OpenAI user with ID: ${dbUser.user_ref}.`);
                     }
@@ -294,6 +311,7 @@ export default class Fl64_Gpt_User_Back_Mod_Openai_User {
                 throw error;
             }
         };
+
 
     }
 }

@@ -15,11 +15,14 @@ await initConfig(container);
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
 /** @type {Fl64_Gpt_User_Back_Mod_Openai_User} */
 const modOpenaiUser = await container.get('Fl64_Gpt_User_Back_Mod_Openai_User$');
+/** @type {Fl64_Gpt_User_Back_Defaults} */
+const DEF = await container.get('Fl64_Gpt_User_Back_Defaults$');
 
 let USER_ID, PIN;
 
 const DATE_LAST_UPDATED = new Date('2023-01-03T00:00:00Z');
 const EPHEMERAL_ID = 'openai_auth_code_123';
+const EPHEMERAL_ID_HTTP = 'openai_auth_code_http';
 const SALT = 'salt';
 
 // Test Suite for OpenAI User Model
@@ -106,4 +109,69 @@ describe('Fl64_Gpt_User_Back_Mod_Openai_User', () => {
         const removedUser = await modOpenaiUser.read({userRef: USER_ID, ephemeralId: EPHEMERAL_ID});
         assert.strictEqual(removedUser, null, 'OpenAI user entry should be deleted');
     });
+
+    describe('updateDateLast', () => {
+        it('should update the last action date for an existing OpenAI user', async () => {
+            await modOpenaiUser.updateDateLast({userRef: USER_ID, ephemeralId: EPHEMERAL_ID});
+
+            const updatedUser = await modOpenaiUser.read({userRef: USER_ID, ephemeralId: EPHEMERAL_ID});
+            assert.ok(updatedUser, 'OpenAI user should exist after updateDateLast');
+            assert.strictEqual(updatedUser.ephemeralId, EPHEMERAL_ID, 'Ephemeral ID should match');
+            assert.ok(updatedUser.dateLast, 'Last action date should be set');
+        });
+
+        it('should do nothing if userRef does not exist', async () => {
+            const invalidUserRef = 99999; // Non-existent userRef
+            const newEphemeralId = 'non-existent-ephemeral-id';
+            let errorOccurred = false;
+            try {
+                await modOpenaiUser.updateDateLast({userRef: invalidUserRef, ephemeralId: newEphemeralId});
+            } catch (error) {
+                errorOccurred = true;
+            }
+            assert.strictEqual(errorOccurred, false, 'The method should not throw an error for non-existent userRef');
+        });
+
+        it('should do nothing if both userRef and ephemeralId are missing', async () => {
+            let errorOccurred = false;
+            try {
+                await modOpenaiUser.updateDateLast({});
+            } catch (error) {
+                errorOccurred = true;
+            }
+            assert.strictEqual(errorOccurred, false, 'The method should not throw an error if both userRef and ephemeralId are missing');
+        });
+
+        it('should retrieve ephemeralId from HTTP headers if not provided', async () => {
+            const httpRequest = {
+                headers: {
+                    [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: EPHEMERAL_ID_HTTP,
+                },
+            };
+
+            await modOpenaiUser.updateDateLast({userRef: USER_ID, httpRequest});
+
+            const updatedUser = await modOpenaiUser.read({userRef: USER_ID, ephemeralId: EPHEMERAL_ID_HTTP});
+            assert.ok(updatedUser, 'OpenAI user should exist after updateDateLast');
+            assert.strictEqual(
+                updatedUser.ephemeralId,
+                EPHEMERAL_ID_HTTP,
+                'Ephemeral ID should match the value from HTTP headers'
+            );
+        });
+
+        it('should handle missing ephemeralId gracefully when using HTTP headers', async () => {
+            const httpRequest = {
+                headers: {},
+            };
+            let errorOccurred = false;
+            try {
+                await modOpenaiUser.updateDateLast({userRef: USER_ID, httpRequest});
+            } catch (error) {
+                errorOccurred = true;
+            }
+            assert.strictEqual(errorOccurred, false, 'The method should not throw an error if ephemeralId is missing in the headers');
+        });
+    });
+
 });
