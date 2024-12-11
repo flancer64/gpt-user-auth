@@ -2,15 +2,18 @@
  * Persistent DTO with metadata for the RDB entity: OAuth2 Client.
  * @namespace Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client
  */
+
 // MODULE'S VARS
+
 /**
- * Path to the entity in plugin's DEM.
+ * Path to the entity in the plugin's DEM.
  *
  * @type {string}
  */
 const ENTITY = '/fl64/gpt/oauth/client';
 
 /**
+ * Attribute mappings for the entity.
  * @memberOf Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client
  * @type {Object}
  */
@@ -26,7 +29,9 @@ const ATTR = {
 Object.freeze(ATTR);
 
 // MODULE'S CLASSES
+
 /**
+ * DTO class representing the persistent structure of the OAuth2 Client entity.
  * @memberOf Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client
  */
 class Dto {
@@ -81,31 +86,32 @@ class Dto {
     date_created;
 }
 
-// noinspection JSClosureCompilerSyntax
 /**
+ * Implements metadata and utility methods for the OAuth2 Client entity.
  * @implements TeqFw_Db_Back_RDb_Meta_IEntity
  */
 export default class Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client {
     /**
-     * @param {Fl64_Gpt_User_Back_Defaults} DEF
-     * @param {TeqFw_Db_Back_RDb_Schema_EntityBase} base
-     * @param {TeqFw_Core_Shared_Util_Cast} cast
-     * @param {typeof Fl64_Gpt_User_Shared_Enum_OAuth2_Client_Status} STATUS
+     * Constructor for the OAuth2 Client persistent DTO class.
+     *
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF - Default settings for the plugin.
+     * @param {TeqFw_Core_Shared_Util_Cast} cast - Utility for type casting.
+     * @param {typeof Fl64_Gpt_User_Shared_Enum_OAuth2_Client_Status} STATUS - Enum for client statuses.
      */
     constructor(
         {
             Fl64_Gpt_User_Back_Defaults$: DEF,
-            TeqFw_Db_Back_RDb_Schema_EntityBase$: base,
             TeqFw_Core_Shared_Util_Cast$: cast,
             'Fl64_Gpt_User_Shared_Enum_OAuth2_Client_Status.default': STATUS,
         }
     ) {
         // INSTANCE METHODS
+
         /**
          * Creates a new DTO object with casted properties.
          *
-         * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client.Dto} [data]
-         * @returns {Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client.Dto}
+         * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client.Dto} [data] - Input data for the DTO.
+         * @returns {Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client.Dto} - Casted DTO instance.
          */
         this.createDto = function (data) {
             const res = new Dto();
@@ -120,18 +126,24 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client {
         };
 
         /**
-         * Set JSDoc return type, real code is in `TeqFw_Db_Back_RDb_Schema_EntityBase`.
+         * Returns the attribute map for the entity.
          *
-         * @returns {typeof Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Client.ATTR}
+         * @returns {Object}
          */
-        this.getAttributes = function () {};
+        this.getAttributes = () => ATTR;
 
-        // MAIN
-        return base.create(this,
-            `${DEF.NAME}${ENTITY}`,
-            ATTR,
-            [ATTR.ID],
-            Dto
-        );
+        /**
+         * Returns the entity's path in the DEM.
+         *
+         * @returns {string}
+         */
+        this.getEntityName = () => `${DEF.NAME}${ENTITY}`;
+
+        /**
+         * Returns the primary key attributes for the entity.
+         *
+         * @returns {Array<string>}
+         */
+        this.getPrimaryKey = () => [ATTR.ID];
     }
 }
