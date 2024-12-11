@@ -1,6 +1,6 @@
 import assert from 'assert';
 import {createContainer} from '@teqfw/test';
-import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../common.mjs';
+import {dbConnect, dbDisconnect, dbReset, initConfig} from '../../../common.mjs';
 
 // SETUP CONTAINER
 const container = await createContainer();
@@ -10,8 +10,9 @@ await initConfig(container);
 /** @type {Fl64_Gpt_User_Back_Mod_OAuth2_Client} */
 const modClient = await container.get('Fl64_Gpt_User_Back_Mod_OAuth2_Client$');
 
-let CLIENT_ID;
+let ID;
 
+const CLIENT_ID = `client-${Date.now()}`;
 const CLIENT_NAME = 'Test Client';
 const CLIENT_NAME_UPDATED = 'Updated Client';
 const REDIRECT_URI = 'https://example.com/callback';
@@ -21,8 +22,6 @@ const REDIRECT_URI_UPDATED = 'https://example.com/updated-callback';
 describe('Fl64_Gpt_User_Back_Mod_OAuth2_Client', () => {
     before(async () => {
         await dbReset(container);
-        const {client} = await dbCreateFkEntities(container);
-        CLIENT_ID = client.id;
         await dbConnect(container);
     });
 
@@ -43,12 +42,13 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Client', () => {
     it('should successfully create a new client entry', async () => {
         // Creating a new client entry
         const dto = modClient.composeEntity();
-        dto.clientId = `client-${Date.now()}`;
+        dto.clientId = CLIENT_ID;
         dto.clientSecret = 'secret';
         dto.name = CLIENT_NAME;
         dto.redirectUri = REDIRECT_URI;
 
         const newClient = await modClient.create({dto});
+        ID = newClient.id;
 
         // Check if the client entry was created
         assert.ok(newClient, 'Client entry should exist');
@@ -57,16 +57,16 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Client', () => {
 
     it('should read an existing client entry by client ID', async () => {
         // Reading the created client entry
-        const foundClient = await modClient.read({id: CLIENT_ID});
+        const foundClient = await modClient.read({id: ID});
 
         // Check if the client entry was read correctly
-        assert.strictEqual(foundClient.id, CLIENT_ID, 'Client ID should match');
+        assert.strictEqual(foundClient.clientId, CLIENT_ID, 'Client ID should match');
         assert.strictEqual(foundClient.name, CLIENT_NAME, 'Client name should match');
     });
 
     it('should update an existing client entry', async () => {
         // Updating the created client entry
-        const dto = await modClient.read({id: CLIENT_ID});
+        const dto = await modClient.read({id: ID});
         dto.name = CLIENT_NAME_UPDATED;
         dto.redirectUri = REDIRECT_URI_UPDATED;
         const updated = await modClient.update({dto});
@@ -90,13 +90,13 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Client', () => {
 
     it('should delete an existing client entry by client ID', async () => {
         // Deleting the created client entry
-        const dto = await modClient.read({id: CLIENT_ID});
+        const dto = await modClient.read({id: ID});
         assert.ok(dto, 'Client entry should exist before deletion');
         const total = await modClient.delete({dto});
         assert.strictEqual(total, 1, 'One client entry should be deleted');
 
         // Attempt to read deleted entry
-        const removedClient = await modClient.read({id: CLIENT_ID});
+        const removedClient = await modClient.read({id: ID});
         assert.strictEqual(removedClient, null, 'Client entry should be deleted');
     });
 });

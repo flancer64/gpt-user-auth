@@ -35,8 +35,8 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Client {
          * @returns {Promise<{id:number}>} - The ID of the newly created client record.
          */
         async function createEntity({trx, dbClient}) {
-            await crud.create(trx, rdbClient, dbClient);
-            return {id: dbClient.id};
+            const {[ATTR.ID]: id} = await crud.create(trx, rdbClient, dbClient);
+            return {id};
         }
 
         /**

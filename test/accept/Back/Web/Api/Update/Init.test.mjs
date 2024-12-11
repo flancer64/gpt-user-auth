@@ -8,8 +8,11 @@ const {
     HTTP2_HEADER_AUTHORIZATION,
     HTTP_STATUS_FORBIDDEN,
 } = H2;
+
+
 const BEARER = process.env.AUTH_TOKEN ?? 'test-token';
 const EMAIL = process.env.EMAIL ?? 'user@any.domain.in.tld';
+const OAI_USER_ID = process.env.OAI_USER_ID ?? 'some-user-id';
 
 // Container setup
 const container = await createContainer();
@@ -24,18 +27,34 @@ const RESULT_CODE = endpoint.getResultCodes();
 
 /** @type {Fl64_Gpt_User_Back_Mod_User} */
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
+/** @type {Fl64_Gpt_User_Back_Defaults} */
+const DEF = await container.get('Fl64_Gpt_User_Back_Defaults$');
 
 describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
+    // VARS
     let USER_ID, PIN;
 
-    const context = {
-        request: {
-            headers: {
-                [HTTP2_HEADER_AUTHORIZATION]: 'Bearer ' + BEARER,
-            },
-        },
-    };
+    const context = createContext();
 
+    // FUNCS
+    function createContext() {
+        return {
+            request: {
+                headers: {
+                    [HTTP2_HEADER_AUTHORIZATION]: 'Bearer ' + BEARER,
+                    [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID
+                },
+            },
+            response: {
+                headersSent: false,
+                writeHead() {},
+                write() {},
+                end() {},
+            }
+        };
+    }
+
+    // MAIN
     before(async function () {
         this.timeout(60000);
         await dbReset(container);
@@ -93,7 +112,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Init', () => {
         const req = endpoint.createReq();
         req.email = EMAIL;
         const res = endpoint.createRes();
-        const contextWrong = structuredClone(context);
+        const contextWrong = createContext();
         contextWrong.request.headers[HTTP2_HEADER_AUTHORIZATION] = 'invalid-bearer';
         let status403;
         contextWrong.response = {
