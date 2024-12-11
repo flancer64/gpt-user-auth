@@ -1,16 +1,19 @@
 /**
- *  Persistent DTO with metadata for the RDB entity: GPT User.
- *  @namespace Fl64_Gpt_User_Back_Store_RDb_Schema_User
+ * Persistent DTO with metadata for the RDB entity: GPT User.
+ * @namespace Fl64_Gpt_User_Back_Store_RDb_Schema_User
  */
+
 // MODULE'S VARS
+
 /**
- * Path to the entity in plugin's DEM.
+ * Path to the entity in the plugin's DEM.
  *
  * @type {string}
  */
 const ENTITY = '/fl64/gpt/user';
 
 /**
+ * Attribute mappings for the entity.
  * @memberOf Fl64_Gpt_User_Back_Store_RDb_Schema_User
  * @type {Object}
  */
@@ -27,7 +30,9 @@ const ATTR = {
 Object.freeze(ATTR);
 
 // MODULE'S CLASSES
+
 /**
+ * DTO class representing the persistent structure of the GPT User entity.
  * @memberOf Fl64_Gpt_User_Back_Store_RDb_Schema_User
  */
 class Dto {
@@ -89,31 +94,32 @@ class Dto {
     user_ref;
 }
 
-// noinspection JSClosureCompilerSyntax
 /**
+ * Implements metadata and utility methods for the GPT User entity.
  * @implements TeqFw_Db_Back_RDb_Meta_IEntity
  */
 export default class Fl64_Gpt_User_Back_Store_RDb_Schema_User {
     /**
-     * @param {Fl64_Gpt_User_Back_Defaults} DEF
-     * @param {TeqFw_Db_Back_RDb_Schema_EntityBase} base
-     * @param {TeqFw_Core_Shared_Util_Cast} cast
-     * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS
+     * Constructor for the GPT User persistent DTO class.
+     *
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF - Default settings for the plugin.
+     * @param {TeqFw_Core_Shared_Util_Cast} cast - Utility for type casting.
+     * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS - Enum for user statuses.
      */
     constructor(
         {
             Fl64_Gpt_User_Back_Defaults$: DEF,
-            TeqFw_Db_Back_RDb_Schema_EntityBase$: base,
             TeqFw_Core_Shared_Util_Cast$: cast,
-            'Fl64_Gpt_User_Shared_Enum_User_Status.defalt': STATUS,
+            'Fl64_Gpt_User_Shared_Enum_User_Status.default': STATUS,
         }
     ) {
         // INSTANCE METHODS
+
         /**
          * Creates a new DTO object with casted properties.
          *
-         * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto} [data]
-         * @returns {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto}
+         * @param {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto} [data] - Input data for the DTO.
+         * @returns {Fl64_Gpt_User_Back_Store_RDb_Schema_User.Dto} - Casted DTO instance.
          */
         this.createDto = function (data) {
             const res = new Dto();
@@ -129,18 +135,24 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_User {
         };
 
         /**
-         * Set JSDoc return type, real code is in `TeqFw_Db_Back_RDb_Schema_EntityBase`.
+         * Returns the attribute map for the entity.
          *
-         * @returns {typeof Fl64_Gpt_User_Back_Store_RDb_Schema_User.ATTR}
+         * @returns {Object}
          */
-        this.getAttributes = function () {};
+        this.getAttributes = () => ATTR;
 
-        // MAIN
-        return base.create(this,
-            `${DEF.NAME}${ENTITY}`,
-            ATTR,
-            [ATTR.USER_REF],
-            Dto
-        );
+        /**
+         * Returns the entity's path in the DEM.
+         *
+         * @returns {string}
+         */
+        this.getEntityName = () => `${DEF.NAME}${ENTITY}`;
+
+        /**
+         * Returns the primary key attributes for the entity.
+         *
+         * @returns {Array<string>}
+         */
+        this.getPrimaryKey = () => [ATTR.USER_REF];
     }
 }

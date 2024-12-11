@@ -144,6 +144,69 @@
                       "attrs": ["client_id"]
                     }
                   }
+                },
+                "code": {
+                  "comment": "Registry of OAuth2 authorization codes.",
+                  "attr": {
+                    "id": {
+                      "type": "id",
+                      "comment": "Primary key for the authorization codes table."
+                    },
+                    "code": {
+                      "type": "string",
+                      "comment": "Generated authorization code."
+                    },
+                    "client_id": {
+                      "type": "ref",
+                      "comment": "Reference to the associated client."
+                    },
+                    "user_id": {
+                      "type": "ref",
+                      "comment": "Reference to the associated user."
+                    },
+                    "expires_at": {
+                      "type": "datetime",
+                      "comment": "Expiration time for the authorization code."
+                    },
+                    "redirect_uri": {
+                      "type": "string",
+                      "comment": "Redirect URI provided during authorization."
+                    },
+                    "scope": {
+                      "type": "string",
+                      "comment": "Optional scopes granted for the authorization."
+                    }
+                  },
+                  "index": {
+                    "code": {
+                      "type": "unique",
+                      "attrs": ["code"]
+                    }
+                  },
+                  "relation": {
+                    "client": {
+                      "attrs": ["client_id"],
+                      "ref": {
+                        "path": "/fl64/gpt/oauth/client",
+                        "attrs": ["id"]
+                      },
+                      "action": {
+                        "delete": "cascade",
+                        "update": "cascade"
+                      }
+                    },
+                    "user": {
+                      "attrs": ["user_id"],
+                      "ref": {
+                        "path": "/fl64/gpt/user",
+                        "attrs": ["user_ref"]
+                      },
+                      "action": {
+                        "delete": "cascade",
+                        "update": "cascade"
+                      }
+                    }
+                  }
                 }
               }
             },
