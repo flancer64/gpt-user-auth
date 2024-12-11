@@ -1,6 +1,6 @@
 {
   "name": "@flancer64/gpt-user-auth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "TeqFW plugin for seamless user authentication via ChatGPT. This plugin enables user registration, login, and profile management with the power of AI, ensuring a user-friendly and secure authentication experience.",
   "homepage": "https://github.com/flancer64/gpt-user-auth/",
