@@ -97,7 +97,12 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Code {
      * @param {Fl64_Gpt_User_Back_Defaults} DEF - Default settings for the plugin.
      * @param {TeqFw_Core_Shared_Util_Cast} cast - Utility for type casting.
      */
-    constructor({Fl64_Gpt_User_Back_Defaults$: DEF, TeqFw_Core_Shared_Util_Cast$: cast}) {
+    constructor(
+        {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
+            TeqFw_Core_Shared_Util_Cast$: cast
+        }
+    ) {
         // INSTANCE METHODS
 
         /**

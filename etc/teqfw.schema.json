@@ -197,18 +197,62 @@
                     },
                     "user": {
                       "attrs": ["user_id"],
-                      "ref": {
-                        "path": "/fl64/gpt/user",
-                        "attrs": ["user_ref"]
-                      },
-                      "action": {
-                        "delete": "cascade",
-                        "update": "cascade"
-                      }
+                      "ref": {"path": "/fl64/gpt/user", "attrs": ["user_ref"]},
+                      "action": {"delete": "cascade", "update": "cascade"}
+                    }
+                  }
+                },
+                "token": {
+                  "comment": "Table for storing access and refresh tokens.",
+                  "attr": {
+                    "id": {"type": "id"},
+                    "access_token": {
+                      "type": "string",
+                      "comment": "Access token for authentication."
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "comment": "Optional refresh token for renewing access tokens.",
+                      "nullable": true
+                    },
+                    "client_ref": {
+                      "type": "ref",
+                      "comment": "Reference to the associated client."
+                    },
+                    "user_ref": {
+                      "type": "ref",
+                      "comment": "Reference to the associated user."
+                    },
+                    "date_expire": {
+                      "type": "datetime",
+                      "comment": "Timestamp for when the access token expires."
+                    },
+                    "scope": {
+                      "type": "string",
+                      "comment": "Optional scope defining access permissions.",
+                      "nullable": true
+                    }
+                  },
+                  "index": {
+                    "access_token": {
+                      "type": "unique",
+                      "attrs": ["access_token"]
+                    }
+                  },
+                  "relation": {
+                    "client": {
+                      "attrs": ["client_ref"],
+                      "ref": {"path": "/fl64/gpt/oauth/client", "attrs": ["id"]},
+                      "action": {"delete": "cascade", "update": "cascade"}
+                    },
+                    "user": {
+                      "attrs": ["user_ref"],
+                      "ref": {"path": "/fl64/gpt/user", "attrs": ["user_ref"]},
+                      "action": {"delete": "cascade", "update": "cascade"}
                     }
                   }
                 }
-              }
+                }
             },
             "openai": {
               "entity": {
