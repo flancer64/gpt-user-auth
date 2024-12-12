@@ -78,6 +78,55 @@ describe('Fl64_Gpt_User_Back_Mod_User_Session', () => {
         assert.strictEqual(foundSession.ipAddress, IP_ADDRESS, 'User session IP address should match');
     });
 
+    it('should retrieve an existing session using getSessionFromRequest', async () => {
+        // Mock HTTP request with sessionId in cookies
+        const mockReq = new Readable({
+            read() {}
+        });
+        mockReq.headers = {
+            cookie: `sessionId=${SESSION_ID}`,
+        };
+
+        // Call the new method
+        const foundSession = await modSession.getSessionFromRequest({req: mockReq});
+
+        // Assertions
+        assert.ok(foundSession, 'User session should be found from the request');
+        assert.strictEqual(foundSession.sessionId, SESSION_ID, 'User session ID should match');
+        assert.strictEqual(foundSession.ipAddress, IP_ADDRESS, 'User session IP address should match');
+        assert.strictEqual(foundSession.userAgent, USER_AGENT, 'User session User-Agent should match');
+    });
+
+    it('should return null if no sessionId is found in cookies', async () => {
+        // Mock HTTP request without sessionId in cookies
+        const mockReq = new Readable({
+            read() {}
+        });
+        mockReq.headers = {
+            cookie: '',
+        };
+
+        // Call the new method
+        const foundSession = await modSession.getSessionFromRequest({req: mockReq});
+
+        // Assertions
+        assert.strictEqual(foundSession, null, 'User session should not be found if no sessionId is present');
+    });
+
+    it('should return null if cookies are missing', async () => {
+        // Mock HTTP request without cookies header
+        const mockReq = new Readable({
+            read() {}
+        });
+        mockReq.headers = {};
+
+        // Call the new method
+        const foundSession = await modSession.getSessionFromRequest({req: mockReq});
+
+        // Assertions
+        assert.strictEqual(foundSession, null, 'User session should not be found if cookies header is missing');
+    });
+
     it('should update an existing user session entry', async () => {
 
         // Updating the created user session entry
@@ -101,22 +150,5 @@ describe('Fl64_Gpt_User_Back_Mod_User_Session', () => {
         assert.strictEqual(removedSession, null, 'User session entry should be deleted');
     });
 
-    it('should retrieve an existing session using getSessionFromRequest', async () => {
-        // Mock HTTP request with sessionId in cookies
-        const mockReq = new Readable({
-            read() {}
-        });
-        mockReq.headers = {
-            cookie: `sessionId=${SESSION_ID}`,
-        };
 
-        // Call the new method
-        const foundSession = await modSession.getSessionFromRequest({req: mockReq});
-
-        // Assertions
-        assert.ok(foundSession, 'User session should be found from the request');
-        assert.strictEqual(foundSession.sessionId, SESSION_ID, 'User session ID should match');
-        assert.strictEqual(foundSession.ipAddress, IP_ADDRESS, 'User session IP address should match');
-        assert.strictEqual(foundSession.userAgent, USER_AGENT, 'User session User-Agent should match');
-    });
 });

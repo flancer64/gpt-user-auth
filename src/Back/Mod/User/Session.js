@@ -150,7 +150,7 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
          * @returns {Promise<Fl64_Gpt_User_Shared_Dto_User_Session.Dto|null>} - The session data as a DTO, or null if no valid session is found.
          */
         this.getSessionFromRequest = async function ({req, trx}) {
-            let session;
+            let session = null;
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 // Use utilCookie to get the sessionId from the request cookies

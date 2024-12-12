@@ -28,6 +28,7 @@
     "@teqfw/db": "github:teqfw/db#main",
     "@teqfw/email": "github:teqfw/email#main",
     "@teqfw/test": "github:teqfw/test#main",
+    "@teqfw/web": "github:teqfw/web#main",
     "better-sqlite3": "latest",
     "dotenv": "latest",
     "mocha": "latest"
