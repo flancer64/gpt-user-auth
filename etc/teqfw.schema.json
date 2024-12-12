@@ -296,6 +296,46 @@
                   }
                 }
               }
+            },
+            "user": {
+              "entity": {
+                "session": {
+                  "comment": "Table storing information about user sessions.",
+                  "attr": {
+                    "session_id": {
+                      "type": "string",
+                      "comment": "Unique session identifier (UUID)."
+                    },
+                    "user_ref": {
+                      "type": "ref",
+                      "comment": "Reference to the user who owns the session."
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "comment": "IP address from which the session was opened."
+                    },
+                    "user_agent": {
+                      "type": "text",
+                      "comment": "Information about the client (browser, device)."
+                    },
+                    "date_created": {
+                      "type": "datetime",
+                      "comment": "Timestamp of when the session was created.",
+                      "default": "current"
+                    }
+                  },
+                  "index": {
+                    "sessionId": {"type": "primary", "attrs": ["session_id"]}
+                  },
+                  "relation": {
+                    "user": {
+                      "attrs": ["user_ref"],
+                      "ref": {"path": "/fl64/gpt/user", "attrs": ["user_ref"]},
+                      "action": {"delete": "cascade", "update": "cascade"}
+                    }
+                  }
+                }
+              }
             }
           }
         }
