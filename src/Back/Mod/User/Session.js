@@ -8,6 +8,7 @@ import {randomUUID} from 'crypto';
 export default class Fl64_Gpt_User_Back_Mod_User_Session {
     /**
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
+     * @param {TeqFw_Web_Back_Util_Cookie} utilCookie
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Shared_Dto_User_Session} dtoSession
      * @param {Fl64_Gpt_User_Back_Convert_User_Session} convSession
@@ -17,6 +18,7 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
     constructor(
         {
             TeqFw_Core_Shared_Api_Logger$$: logger,
+            TeqFw_Web_Back_Util_Cookie$: utilCookie,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Shared_Dto_User_Session$: dtoSession,
             Fl64_Gpt_User_Back_Convert_User_Session$: convSession,
@@ -139,6 +141,40 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
                 throw error;
             }
         };
+
+        /**
+         * Retrieves the session ID from the HTTP request and fetches the session data from the database.
+         *
+         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
+         * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Database transaction context.
+         * @returns {Promise<Fl64_Gpt_User_Shared_Dto_User_Session.Dto|null>} - The session data as a DTO, or null if no valid session is found.
+         */
+        this.getSessionFromRequest = async function ({req, trx}) {
+            let session;
+            const trxLocal = trx ?? await conn.startTransaction();
+            try {
+                // Use utilCookie to get the sessionId from the request cookies
+                const sessionId = utilCookie.get({request: req, cookie: 'sessionId'});
+                if (sessionId) {
+                    // Fetch session from the database
+                    session = await this.read({trx: trxLocal, sessionId});
+                    if (session) {
+                        logger.info(`Session retrieved successfully for session ID: ${sessionId}`);
+                    } else {
+                        logger.info(`Session not found for session ID: ${sessionId}`);
+                    }
+                } else {
+                    logger.info('No sessionId found in the cookies.');
+                }
+                if (!trx) await trxLocal.commit();
+                return session;
+            } catch (error) {
+                if (!trx) await trxLocal.rollback();
+                logger.error(`Error retrieving session from request: ${error.message}`);
+                throw error;
+            }
+        };
+
 
         /**
          * Retrieves a list of all user session records from the database as domain DTOs.

@@ -1,6 +1,7 @@
 import assert from 'assert';
 import {createContainer} from '@teqfw/test';
 import {dbConnect, dbCreateFkEntities, dbDisconnect, dbReset, initConfig} from '../../../common.mjs';
+import {Readable} from 'stream';
 
 // VARS
 const EMAIL = process.env.EMAIL ?? 'user@any.domain.in.tld';
@@ -98,5 +99,24 @@ describe('Fl64_Gpt_User_Back_Mod_User_Session', () => {
         // Attempt to read deleted entry
         const removedSession = await modSession.read({sessionId: SESSION_ID});
         assert.strictEqual(removedSession, null, 'User session entry should be deleted');
+    });
+
+    it('should retrieve an existing session using getSessionFromRequest', async () => {
+        // Mock HTTP request with sessionId in cookies
+        const mockReq = new Readable({
+            read() {}
+        });
+        mockReq.headers = {
+            cookie: `sessionId=${SESSION_ID}`,
+        };
+
+        // Call the new method
+        const foundSession = await modSession.getSessionFromRequest({req: mockReq});
+
+        // Assertions
+        assert.ok(foundSession, 'User session should be found from the request');
+        assert.strictEqual(foundSession.sessionId, SESSION_ID, 'User session ID should match');
+        assert.strictEqual(foundSession.ipAddress, IP_ADDRESS, 'User session IP address should match');
+        assert.strictEqual(foundSession.userAgent, USER_AGENT, 'User session User-Agent should match');
     });
 });
