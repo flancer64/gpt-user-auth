@@ -5,6 +5,19 @@
       "path": "./src"
     }
   },
+  "@teqfw/core": {
+    "commands": [
+      "Fl64_Gpt_User_Back_Cli_OAuth2_Client_Create"
+    ]
+  },
+  "@teqfw/web": {
+    "handlers": {
+      "Fl64_Gpt_User_Back_Web_Handler": {
+        "before": ["TeqFw_Web_Api_Back_Web_Handler_Service"],
+        "spaces": ["fl64-gpt-user"]
+      }
+    }
+  },
   "@teqfw/web-api": {
     "services": [
       "Fl64_Gpt_User_Back_Web_Api_SignUp_Init",

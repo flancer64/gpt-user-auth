@@ -7,6 +7,7 @@ import {randomUUID} from 'crypto';
  */
 export default class Fl64_Gpt_User_Back_Mod_User_Session {
     /**
+     * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
      * @param {TeqFw_Web_Back_Util_Cookie} utilCookie
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
@@ -17,6 +18,7 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
      */
     constructor(
         {
+            Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             TeqFw_Web_Back_Util_Cookie$: utilCookie,
             TeqFw_Db_Back_RDb_IConnect$: conn,
@@ -143,6 +145,44 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
         };
 
         /**
+         * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Database transaction context.
+         * @param {Fl64_Gpt_User_Shared_Dto_User.Dto} user
+         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
+         * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object
+         * @return {Promise<void>}
+         */
+        this.establish = async function ({trx, user, req, res}) {
+            if (user?.userRef) {
+                const trxLocal = trx ?? await conn.startTransaction();
+                try {
+                    // Extract IP address & user-agent
+                    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+                    const userAgent = req.headers['user-agent'] || 'Unknown';
+                    const dbSession = rdbSession.createDto();
+                    dbSession.ip_address = ipAddress;
+                    dbSession.session_id = randomUUID();
+                    dbSession.user_agent = userAgent;
+                    dbSession.user_ref = user.userRef;
+                    await createEntity({trx, dbSession});
+                    if (!trx) await trxLocal.commit();
+                    // create and set cookie
+                    const cookie = utilCookie.create({
+                        expires: DEF.COOKIE_SESSION_LIFETIME,
+                        name: DEF.COOKIE_SESSION,
+                        path: '/',
+                        value: dbSession.session_id,
+                    });
+                    utilCookie.set({response: res, cookie});
+                    logger.info(`New session is established for user #${dbSession.user_ref} from IP ${dbSession.ip_address}`);
+                } catch (error) {
+                    if (!trx) await trxLocal.rollback();
+                    logger.error(`Error during user authentication: ${error.message}`);
+                    throw error;
+                }
+            }
+        };
+
+        /**
          * Retrieves the session ID from the HTTP request and fetches the session data from the database.
          *
          * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
@@ -151,30 +191,25 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
          */
         this.getSessionFromRequest = async function ({req, trx}) {
             let session = null;
-            const trxLocal = trx ?? await conn.startTransaction();
-            try {
-                // Use utilCookie to get the sessionId from the request cookies
-                const sessionId = utilCookie.get({request: req, cookie: 'sessionId'});
-                if (sessionId) {
+            const sessionId = utilCookie.get({request: req, cookie: DEF.COOKIE_SESSION});
+            if (sessionId) {
+                const trxLocal = trx ?? await conn.startTransaction();
+                try {
                     // Fetch session from the database
                     session = await this.read({trx: trxLocal, sessionId});
-                    if (session) {
-                        logger.info(`Session retrieved successfully for session ID: ${sessionId}`);
-                    } else {
+                    if (!session)
                         logger.info(`Session not found for session ID: ${sessionId}`);
-                    }
-                } else {
-                    logger.info('No sessionId found in the cookies.');
+                    if (!trx) await trxLocal.commit();
+                } catch (error) {
+                    if (!trx) await trxLocal.rollback();
+                    logger.error(`Error retrieving session from request: ${error.message}`);
+                    throw error;
                 }
-                if (!trx) await trxLocal.commit();
-                return session;
-            } catch (error) {
-                if (!trx) await trxLocal.rollback();
-                logger.error(`Error retrieving session from request: ${error.message}`);
-                throw error;
+            } else {
+                logger.info('No sessionId found in the cookies.');
             }
+            return session;
         };
-
 
         /**
          * Retrieves a list of all user session records from the database as domain DTOs.

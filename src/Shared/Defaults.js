@@ -11,6 +11,8 @@ export default class Fl64_Gpt_User_Shared_Defaults {
     ROUTE_UPDATE = '/web/@flancer64/gpt-user-auth/update.html?token=:code';
     ROUTE_VERIFY = '/web/@flancer64/gpt-user-auth/signup.html?token=:code';
 
+    SPACE = 'fl64-gpt-user';
+
     constructor(
         {
             TeqFw_Web_Shared_Defaults$: MOD_WEB

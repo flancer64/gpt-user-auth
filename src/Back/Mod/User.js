@@ -99,6 +99,55 @@ export default class Fl64_Gpt_User_Back_Mod_User {
         // MAIN
 
         /**
+         * Authenticates a user based on their email or PIN and password.
+         *
+         * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Optional transaction context.
+         * @param {string} identifier - User's email or PIN.
+         * @param {string} password - Plain text password.
+         * @returns {Promise<Fl64_Gpt_User_Shared_Dto_User.Dto>} - User DTO if authenticated, otherwise undefined.
+         */
+        this.authenticate = async function ({trx, identifier, password}) {
+            let result;
+            const trxLocal = trx ?? await conn.startTransaction();
+
+            try {
+                let email, pin;
+
+                // Determine if the identifier is an email or PIN
+                if (identifier.includes('@')) {
+                    email = normEmail(identifier);
+                } else {
+                    pin = identifier;
+                }
+
+                // Fetch user from the database
+                const {dbUser} = await readEntity({trx: trxLocal, email, pin});
+                if (dbUser) {
+                    logger.info(`User successfully retrieved (ID: ${dbUser.user_ref}).`);
+
+                    // Hash the provided password and compare with stored hash
+                    const hash = this.hashPassPhrase({passPhrase: password, salt: dbUser.pass_salt});
+                    if (hash === dbUser.pass_hash) {
+                        result = convUser.db2dom({dbUser});
+                    } else {
+                        logger.info(`Invalid password for user (Identifier: ${identifier}, ID: ${dbUser.user_ref}).`);
+                    }
+                } else {
+                    logger.info(`No user found for identifier: ${identifier}.`);
+                }
+
+                if (!trx) await trxLocal.commit();
+            } catch (error) {
+                if (!trx) await trxLocal.rollback();
+                logger.error(`Error during user authentication: ${error.message}`);
+                throw error;
+            }
+
+            return result;
+        };
+
+
+        /**
          * @type {function(Fl64_Gpt_User_Shared_Dto_User.Dto=): Fl64_Gpt_User_Shared_Dto_User.Dto}
          */
         this.composeEntity = dtoUser.createDto;

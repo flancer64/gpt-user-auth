@@ -9,7 +9,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
-     * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
+     * @param {TeqFw_Web_Back_App_Server_Respond} respond
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
@@ -22,7 +22,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
             TeqFw_Core_Shared_Api_Logger$$: logger,
             Fl64_Gpt_User_Shared_Web_Api_Update_Init$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
-            'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
+            TeqFw_Web_Back_App_Server_Respond$: respond,
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
@@ -59,7 +59,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Init {
             utilLog.traceOpenAi(context?.request);
             // Check for authorization
             if (!modAuth.isValidRequest(context?.request)) {
-                respond403(context?.response);
+                respond.status403(context?.response);
                 return;
             }
 

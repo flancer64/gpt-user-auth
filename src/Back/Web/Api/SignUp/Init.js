@@ -12,7 +12,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
     /**
      * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Shared_Api_Logger} logger - instance
-     * @param {TeqFw_Web_Back_App_Server_Respond.respond403|function} respond403
+     * @param {TeqFw_Web_Back_App_Server_Respond} respond
      * @param {Fl64_Gpt_User_Shared_Web_Api_SignUp_Init} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
@@ -26,7 +26,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
         {
             Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Shared_Api_Logger$$: logger,
-            'TeqFw_Web_Back_App_Server_Respond.respond403': respond403,
+            TeqFw_Web_Back_App_Server_Respond$: respond,
             Fl64_Gpt_User_Shared_Web_Api_SignUp_Init$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
@@ -122,7 +122,7 @@ please contact the administrator or use the account recovery feature. Re-registr
                 // Populate response
                 Object.assign(res, rs);
             } else {
-                respond403(context.response);
+                respond.status403(context.response);
             }
         };
     }
