@@ -1,4 +1,4 @@
-import { container } from '@teqfw/test';
+import {container} from '@teqfw/test';
 import assert from 'assert';
 
 // GET OBJECTS FROM CONTAINER
@@ -10,33 +10,31 @@ const rdbDto = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_C
 const converter = await container.get('Fl64_Gpt_User_Back_Convert_OAuth2_Client$');
 
 describe('Fl64_Gpt_User_Back_Convert_OAuth2_Client', () => {
-    const sampleRdbDto = rdbDto.createDto({
-        client_id: 'example-client-id',
-        client_secret: 'example-secret',
-        date_created: new Date('2023-01-01T00:00:00Z'),
-        id: 1,
-        name: 'Example Client',
-        redirect_uri: 'https://example.com/callback',
-        status: 'ACTIVE',
-    });
+    const sampleRdbDto = rdbDto.createDto();
+    sampleRdbDto.client_id = 'example-client-id';
+    sampleRdbDto.client_secret = 'example-secret';
+    sampleRdbDto.date_created = new Date('2023-01-01T00:00:00Z');
+    sampleRdbDto.id = 1;
+    sampleRdbDto.name = 'Example Client';
+    sampleRdbDto.redirect_uri = 'https://example.com/callback';
+    sampleRdbDto.status = 'ACTIVE';
 
-    const sampleDomDto = domDto.createDto({
-        clientId: 'example-client-id',
-        clientSecret: 'example-secret',
-        dateCreated: new Date('2023-01-01T00:00:00Z'),
-        id: 1,
-        name: 'Example Client',
-        redirectUri: 'https://example.com/callback',
-        status: 'ACTIVE',
-    });
+    const sampleDomDto = domDto.createDto();
+    sampleDomDto.clientId = 'example-client-id';
+    sampleDomDto.clientSecret = 'example-secret';
+    sampleDomDto.dateCreated = new Date('2023-01-01T00:00:00Z');
+    sampleDomDto.id = 1;
+    sampleDomDto.name = 'Example Client';
+    sampleDomDto.redirectUri = 'https://example.com/callback';
+    sampleDomDto.status = 'ACTIVE';
 
     it('should convert RDB DTO to Domain DTO correctly', () => {
-        const domDto = converter.db2dom({ dbClient: sampleRdbDto });
-        assert.deepStrictEqual(domDto, sampleDomDto, 'Converted Domain DTO should match the sample Domain DTO');
+        const domDtoResult = converter.db2dom({dbClient: sampleRdbDto});
+        assert.deepStrictEqual(domDtoResult, sampleDomDto, 'Converted Domain DTO should match the sample Domain DTO');
     });
 
     it('should convert Domain DTO to RDB DTO correctly', () => {
-        const { dbClient: rdbDto } = converter.dom2db({ client: sampleDomDto });
-        assert.deepStrictEqual(rdbDto, sampleRdbDto, 'Converted RDB DTO should match the sample RDB DTO');
+        const {dbClient: rdbDtoResult} = converter.dom2db({client: sampleDomDto});
+        assert.deepStrictEqual(rdbDtoResult, sampleRdbDto, 'Converted RDB DTO should match the sample RDB DTO');
     });
 });

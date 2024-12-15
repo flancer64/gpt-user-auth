@@ -10,25 +10,23 @@ const rdbDto = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_T
 const converter = await container.get('Fl64_Gpt_User_Back_Convert_OAuth2_Token$');
 
 describe('Fl64_Gpt_User_Back_Convert_OAuth2_Token', () => {
-    const sampleRdbDto = rdbDto.createDto({
-        id: 1,
-        access_token: 'abc123',
-        refresh_token: 'refresh123',
-        client_ref: 1001,
-        user_ref: 2002,
-        date_expire: new Date('2024-01-01T12:00:00Z'),
-        scope: 'read,write'
-    });
+    const sampleRdbDto = rdbDto.createDto();
+    sampleRdbDto.access_token = 'abc123';
+    sampleRdbDto.client_ref = 1001;
+    sampleRdbDto.date_expire = new Date('2024-01-01T12:00:00Z');
+    sampleRdbDto.id = 1;
+    sampleRdbDto.refresh_token = 'refresh123';
+    sampleRdbDto.scope = 'read,write';
+    sampleRdbDto.user_ref = 2002;
 
-    const sampleDomDto = domDto.createDto({
-        id: 1,
-        accessToken: 'abc123',
-        refreshToken: 'refresh123',
-        clientRef: 1001,
-        userRef: 2002,
-        dateExpire: new Date('2024-01-01T12:00:00Z'),
-        scope: 'read,write'
-    });
+    const sampleDomDto = domDto.createDto();
+    sampleDomDto.accessToken = 'abc123';
+    sampleDomDto.clientRef = 1001;
+    sampleDomDto.dateExpire = new Date('2024-01-01T12:00:00Z');
+    sampleDomDto.id = 1;
+    sampleDomDto.refreshToken = 'refresh123';
+    sampleDomDto.scope = 'read,write';
+    sampleDomDto.userRef = 2002;
 
     it('should convert RDB DTO to Domain DTO correctly', () => {
         const result = converter.db2dom({dbToken: sampleRdbDto});

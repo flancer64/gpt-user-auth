@@ -25,10 +25,10 @@ export default class Fl64_Gpt_User_Back_Convert_User_Session {
         this.db2dom = function ({dbSession}) {
             const res = domDto.createDto();
             res.dateCreated = cast.date(dbSession?.date_created);
-            res.sessionId = cast.string(dbSession?.session_id);
-            res.userRef = cast.int(dbSession?.user_ref);
             res.ipAddress = cast.string(dbSession?.ip_address);
+            res.sessionId = cast.string(dbSession?.session_id);
             res.userAgent = cast.string(dbSession?.user_agent);
+            res.userRef = cast.int(dbSession?.user_ref);
             return res;
         };
 
@@ -47,10 +47,10 @@ export default class Fl64_Gpt_User_Back_Convert_User_Session {
         this.dom2db = function ({session}) {
             const dbSession = rdbDto.createDto();
             dbSession.date_created = cast.date(session?.dateCreated);
-            dbSession.session_id = cast.string(session?.sessionId);
-            dbSession.user_ref = cast.int(session?.userRef);
             dbSession.ip_address = cast.string(session?.ipAddress);
+            dbSession.session_id = cast.string(session?.sessionId);
             dbSession.user_agent = cast.string(session?.userAgent);
+            dbSession.user_ref = cast.int(session?.userRef);
             return {dbSession};
         };
     }

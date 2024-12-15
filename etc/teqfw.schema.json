@@ -156,11 +156,11 @@
                       "type": "string",
                       "comment": "Generated authorization code."
                     },
-                    "client_id": {
+                    "client_ref": {
                       "type": "ref",
                       "comment": "Reference to the associated client."
                     },
-                    "user_id": {
+                    "user_ref": {
                       "type": "ref",
                       "comment": "Reference to the associated user."
                     },
@@ -185,7 +185,7 @@
                   },
                   "relation": {
                     "client": {
-                      "attrs": ["client_id"],
+                      "attrs": ["client_ref"],
                       "ref": {
                         "path": "/fl64/gpt/oauth/client",
                         "attrs": ["id"]
@@ -196,7 +196,7 @@
                       }
                     },
                     "user": {
-                      "attrs": ["user_id"],
+                      "attrs": ["user_ref"],
                       "ref": {"path": "/fl64/gpt/user", "attrs": ["user_ref"]},
                       "action": {"delete": "cascade", "update": "cascade"}
                     }

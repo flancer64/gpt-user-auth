@@ -18,7 +18,7 @@ class Dto {
      * Reference to the associated client.
      * @type {number}
      */
-    clientId;
+    clientRef;
 
     /**
      * Expiration time for the authorization code.
@@ -71,7 +71,7 @@ export default class Fl64_Gpt_User_Shared_Dto_OAuth2_Code {
             const res = Object.assign(new Dto(), data);
 
             // Cast known attributes
-            res.clientId = cast.int(data?.clientId);
+            res.clientRef = cast.int(data?.clientRef);
             res.code = cast.string(data?.code);
             res.dateExpired = cast.date(data?.dateExpired);
             res.id = cast.int(data?.id);

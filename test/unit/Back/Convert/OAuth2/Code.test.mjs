@@ -10,25 +10,23 @@ const rdbDto = await container.get('Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_C
 const converter = await container.get('Fl64_Gpt_User_Back_Convert_OAuth2_Code$');
 
 describe('Fl64_Gpt_User_Back_Convert_OAuth2_Code', () => {
-    const sampleRdbDto = rdbDto.createDto({
-        id: 1,
-        code: 'sample-code',
-        client_id: 1001,
-        user_id: 5005,
-        expires_at: new Date('2023-01-01T00:00:00Z'),
-        redirect_uri: 'https://example.com/callback',
-        scope: 'read write',
-    });
+    const sampleRdbDto = rdbDto.createDto();
+    sampleRdbDto.client_ref = 1001;
+    sampleRdbDto.code = 'sample-code';
+    sampleRdbDto.date_expired = new Date('2023-01-01T00:00:00Z');
+    sampleRdbDto.id = 1;
+    sampleRdbDto.redirect_uri = 'https://example.com/callback';
+    sampleRdbDto.scope = 'read write';
+    sampleRdbDto.user_ref = 5005;
 
-    const sampleDomDto = domDto.createDto({
-        id: 1,
-        code: 'sample-code',
-        clientId: 1001,
-        userId: 5005,
-        expiresAt: new Date('2023-01-01T00:00:00Z'),
-        redirectUri: 'https://example.com/callback',
-        scope: 'read write',
-    });
+    const sampleDomDto = domDto.createDto();
+    sampleDomDto.clientRef = 1001;
+    sampleDomDto.code = 'sample-code';
+    sampleDomDto.dateExpired = new Date('2023-01-01T00:00:00Z');
+    sampleDomDto.id = 1;
+    sampleDomDto.redirectUri = 'https://example.com/callback';
+    sampleDomDto.scope = 'read write';
+    sampleDomDto.userRef = 5005;
 
     it('should convert RDB DTO to Domain DTO correctly', () => {
         const domResult = converter.db2dom({dbCode: sampleRdbDto});

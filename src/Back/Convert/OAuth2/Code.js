@@ -24,13 +24,13 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Code {
          */
         this.db2dom = function ({dbCode}) {
             const res = domDto.createDto();
-            res.id = cast.int(dbCode?.id);
+            res.clientRef = cast.int(dbCode?.client_ref);
             res.code = cast.string(dbCode?.code);
-            res.clientId = cast.int(dbCode?.client_id);
-            res.userRef = cast.int(dbCode?.user_ref);
             res.dateExpired = cast.date(dbCode?.date_expired);
+            res.id = cast.int(dbCode?.id);
             res.redirectUri = cast.string(dbCode?.redirect_uri);
             res.scope = cast.string(dbCode?.scope);
+            res.userRef = cast.int(dbCode?.user_ref);
             return res;
         };
 
@@ -42,13 +42,13 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Code {
          */
         this.dom2db = function ({code}) {
             const dbCode = rdbDto.createDto();
-            dbCode.id = cast.int(code?.id);
+            dbCode.client_ref = cast.int(code?.clientRef);
             dbCode.code = cast.string(code?.code);
-            dbCode.client_id = cast.int(code?.clientId);
-            dbCode.user_ref = cast.int(code?.userRef);
             dbCode.date_expired = cast.date(code?.dateExpired);
+            dbCode.id = cast.int(code?.id);
             dbCode.redirect_uri = cast.string(code?.redirectUri);
             dbCode.scope = cast.string(code?.scope);
+            dbCode.user_ref = cast.int(code?.userRef);
             return {dbCode};
         };
     }

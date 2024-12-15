@@ -26,13 +26,13 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Token {
          */
         this.db2dom = function ({dbToken}) {
             const res = domDto.createDto();
-            res.id = cast.int(dbToken?.id);
             res.accessToken = cast.string(dbToken?.access_token);
-            res.refreshToken = cast.string(dbToken?.refresh_token);
             res.clientRef = cast.int(dbToken?.client_ref);
-            res.userRef = cast.int(dbToken?.user_ref);
             res.dateExpire = cast.date(dbToken?.date_expire);
+            res.id = cast.int(dbToken?.id);
+            res.refreshToken = cast.string(dbToken?.refresh_token);
             res.scope = cast.string(dbToken?.scope);
+            res.userRef = cast.int(dbToken?.user_ref);
             return res;
         };
 
@@ -43,13 +43,13 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Token {
          */
         this.dom2db = function ({token}) {
             const dbToken = rdbDto.createDto();
-            dbToken.id = cast.int(token?.id);
             dbToken.access_token = cast.string(token?.accessToken);
-            dbToken.refresh_token = cast.string(token?.refreshToken);
             dbToken.client_ref = cast.int(token?.clientRef);
-            dbToken.user_ref = cast.int(token?.userRef);
             dbToken.date_expire = cast.date(token?.dateExpire);
+            dbToken.id = cast.int(token?.id);
+            dbToken.refresh_token = cast.string(token?.refreshToken);
             dbToken.scope = cast.string(token?.scope);
+            dbToken.user_ref = cast.int(token?.userRef);
             return {dbToken};
         };
     }

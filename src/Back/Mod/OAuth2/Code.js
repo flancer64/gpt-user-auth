@@ -1,3 +1,5 @@
+import {randomUUID} from 'crypto';
+
 /**
  * Manages OAuth2 Authorization Code data in a relational database.
  *
@@ -106,10 +108,10 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Code {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 const {dbCode} = convCode.dom2db({code: dto});
+                if (!dbCode.code) dbCode.code = randomUUID();
                 const id = await createEntity({trx: trxLocal, dbCode});
-
-                const createdDbCode = await readEntity({trx: trxLocal, id});
-                const res = convCode.db2dom({dbCode: createdDbCode});
+                const created = await readEntity({trx: trxLocal, id});
+                const res = convCode.db2dom({dbCode: created});
                 if (!trx) await trxLocal.commit();
                 logger.info(`OAuth2 authorization code #${id} created.`);
                 return res;

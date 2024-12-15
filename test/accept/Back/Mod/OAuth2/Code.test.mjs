@@ -18,10 +18,9 @@ const modClient = await container.get('Fl64_Gpt_User_Back_Mod_OAuth2_Client$');
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
 
 // Working variables
-let CLIENT_ID, USER_ID;
+let CLIENT_ID, USER_ID, CODE;
 
 // Constants
-const CODE = 'sample-code';
 const EXPIRES_AT = new Date(Date.now() + 3600000); // 1 hour from now
 const REDIRECT_URI = 'https://example.com/redirect';
 const SCOPE = 'read,write';
@@ -60,18 +59,17 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Code', () => {
 
     it('should create a new OAuth2 code entry', async () => {
         const dto = modCode.composeEntity();
-        dto.clientId = CLIENT_ID;
+        dto.clientRef = CLIENT_ID;
         dto.userRef = USER_ID;
-        dto.code = CODE;
         dto.dateExpired = EXPIRES_AT;
         dto.redirectUri = REDIRECT_URI;
         dto.scope = SCOPE;
 
         const created = await modCode.create({dto});
-
+        CODE = created.code;
         assert.ok(created, 'Created entry should exist');
-        assert.strictEqual(created.code, CODE, 'Code should match');
-        assert.strictEqual(created.clientId, CLIENT_ID, 'Client ID should match');
+        assert.strictEqual(created.clientRef, CLIENT_ID, 'Client ID should match');
+        assert.strictEqual(created.userRef, USER_ID, 'User ID should match');
     });
 
     it('should read an existing OAuth2 code entry', async () => {
@@ -79,7 +77,7 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Code', () => {
 
         assert.ok(read, 'Read entry should exist');
         assert.strictEqual(read.code, CODE, 'Code should match');
-        assert.strictEqual(read.clientId, CLIENT_ID, 'Client ID should match');
+        assert.strictEqual(read.clientRef, CLIENT_ID, 'Client ID should match');
     });
 
     it('should list all OAuth2 code entries', async () => {

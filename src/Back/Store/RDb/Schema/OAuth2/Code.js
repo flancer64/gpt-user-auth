@@ -18,7 +18,7 @@ const ENTITY = '/fl64/gpt/oauth/code';
  * @type {Object}
  */
 const ATTR = {
-    CLIENT_ID: 'client_id',
+    CLIENT_REF: 'client_ref',
     CODE: 'code',
     DATE_EXPIRED: 'date_expired',
     ID: 'id',
@@ -40,7 +40,7 @@ class Dto {
      *
      * @type {number}
      */
-    client_id;
+    client_ref;
 
     /**
      * Generated authorization code.
@@ -112,7 +112,7 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Code {
          */
         this.createDto = function (data) {
             const res = new Dto();
-            res.client_id = cast.int(data?.client_id);
+            res.client_ref = cast.int(data?.client_ref);
             res.code = cast.string(data?.code);
             res.date_expired = cast.date(data?.date_expired);
             res.id = cast.int(data?.id);
