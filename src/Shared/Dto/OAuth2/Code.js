@@ -9,12 +9,6 @@
  */
 class Dto {
     /**
-     * Primary key for the authorization code.
-     * @type {number}
-     */
-    id;
-
-    /**
      * Generated authorization code.
      * @type {string}
      */
@@ -27,16 +21,16 @@ class Dto {
     clientId;
 
     /**
-     * Reference to the associated user.
-     * @type {number}
-     */
-    userId;
-
-    /**
      * Expiration time for the authorization code.
      * @type {Date}
      */
-    expiresAt;
+    dateExpired;
+
+    /**
+     * Primary key for the authorization code.
+     * @type {number}
+     */
+    id;
 
     /**
      * Redirect URI provided during authorization.
@@ -49,6 +43,12 @@ class Dto {
      * @type {string|null}
      */
     scope;
+
+    /**
+     * Reference to the associated user.
+     * @type {number}
+     */
+    userRef;
 }
 
 /**
@@ -71,13 +71,13 @@ export default class Fl64_Gpt_User_Shared_Dto_OAuth2_Code {
             const res = Object.assign(new Dto(), data);
 
             // Cast known attributes
-            res.id = cast.int(data?.id);
-            res.code = cast.string(data?.code);
             res.clientId = cast.int(data?.clientId);
-            res.userId = cast.int(data?.userId);
-            res.expiresAt = cast.date(data?.expiresAt);
+            res.code = cast.string(data?.code);
+            res.dateExpired = cast.date(data?.dateExpired);
+            res.id = cast.int(data?.id);
             res.redirectUri = cast.string(data?.redirectUri);
             res.scope = cast.string(data?.scope);
+            res.userRef = cast.int(data?.userRef);
 
             return res;
         };

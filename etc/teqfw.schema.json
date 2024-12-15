@@ -164,7 +164,7 @@
                       "type": "ref",
                       "comment": "Reference to the associated user."
                     },
-                    "expires_at": {
+                    "date_expired": {
                       "type": "datetime",
                       "comment": "Expiration time for the authorization code."
                     },

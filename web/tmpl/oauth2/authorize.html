@@ -5,87 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authorize Access</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* Basic reset for consistent styling */
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
+        }
+
+        /* Main body styles */
+        body {
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-        }
-
-        .auth-container {
-            background: #fff;
+            background-color: #202123;
+            color: #e0e0e0;
+            display: flex;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            min-height: 100vh;
             padding: 20px;
+        }
+
+        /* Container styles */
+        .container {
+            background-color: #333;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             max-width: 400px;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
         }
 
-        .auth-container h1 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-
-        .auth-container p {
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .auth-container form {
-            margin-top: 20px;
-        }
-
-        .auth-container form label {
-            display: block;
-            margin-bottom: 5px;
+        /* Header styling */
+        .container h1 {
+            color: #ffffff;
+            font-size: 24px;
             font-weight: bold;
+            margin-bottom: 20px;
         }
 
-        .auth-container form input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
+        /* Description text styling */
+        .container p {
+            color: #cfcfcf;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        /* Scope text styling */
+        .scope {
+            background-color: #444;
             border-radius: 4px;
+            color: #e0e0e0;
+            display: inline-block;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px 15px;
+            text-align: left;
         }
 
-        .auth-container form button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: #fff;
+        /* Button styles */
+        .button {
+            background-color: #10a37f;
             border: none;
             border-radius: 4px;
+            color: #ffffff;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s;
         }
 
-        .auth-container form button:hover {
-            background-color: #0056b3;
+        .button:hover {
+            background-color: #0d8b6a;
+        }
+
+        .button.cancel {
+            background-color: #ff4d4d;
+            margin-left: 10px;
+        }
+
+        .button.cancel:hover {
+            background-color: #cc3c3c;
         }
     </style>
 </head>
 <body>
-<div class="auth-container">
-    <h1>Authorize Application</h1>
-    <p><strong>Client:</strong> <span id="client-name">My GPT Chat</span></p>
-    <p><strong>Requested Scopes:</strong> <span id="client-scope">Effective Area</span></p>
+<div class="container">
+    <h1>Authorize Access</h1>
+    <p>
+        You are authorizing <strong>{{clientName}}</strong> to access your data with the following scope:
+    </p>
 
-    <form method="POST" action="/web-api/oauth2/login">
-        <input type="hidden" name="redirect_uri" value="{{redirect_uri}}">
-        <input type="hidden" name="state" value="{{state}}">
+    <div class="scope">
+        {{scope}}
+    </div>
 
-        <label for="email">Email or PIN:</label>
-        <input type="text" id="email" name="email" placeholder="Enter your email or PIN" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-        <button type="submit">Authorize</button>
+    <form method="POST" action="{{redirectUri}}">
+        <button class="button" type="submit">Authorize</button>
+        <button class="button cancel" type="button" onclick="window.history.back()">Cancel</button>
     </form>
 </div>
 </body>

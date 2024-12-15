@@ -27,8 +27,8 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Code {
             res.id = cast.int(dbCode?.id);
             res.code = cast.string(dbCode?.code);
             res.clientId = cast.int(dbCode?.client_id);
-            res.userId = cast.int(dbCode?.user_id);
-            res.expiresAt = cast.date(dbCode?.expires_at);
+            res.userRef = cast.int(dbCode?.user_ref);
+            res.dateExpired = cast.date(dbCode?.date_expired);
             res.redirectUri = cast.string(dbCode?.redirect_uri);
             res.scope = cast.string(dbCode?.scope);
             return res;
@@ -45,8 +45,8 @@ export default class Fl64_Gpt_User_Back_Convert_OAuth2_Code {
             dbCode.id = cast.int(code?.id);
             dbCode.code = cast.string(code?.code);
             dbCode.client_id = cast.int(code?.clientId);
-            dbCode.user_id = cast.int(code?.userId);
-            dbCode.expires_at = cast.date(code?.expiresAt);
+            dbCode.user_ref = cast.int(code?.userRef);
+            dbCode.date_expired = cast.date(code?.dateExpired);
             dbCode.redirect_uri = cast.string(code?.redirectUri);
             dbCode.scope = cast.string(code?.scope);
             return {dbCode};

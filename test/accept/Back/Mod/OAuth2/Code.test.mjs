@@ -61,9 +61,9 @@ describe('Fl64_Gpt_User_Back_Mod_OAuth2_Code', () => {
     it('should create a new OAuth2 code entry', async () => {
         const dto = modCode.composeEntity();
         dto.clientId = CLIENT_ID;
-        dto.userId = USER_ID;
+        dto.userRef = USER_ID;
         dto.code = CODE;
-        dto.expiresAt = EXPIRES_AT;
+        dto.dateExpired = EXPIRES_AT;
         dto.redirectUri = REDIRECT_URI;
         dto.scope = SCOPE;
 

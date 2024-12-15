@@ -20,12 +20,11 @@ const ENTITY = '/fl64/gpt/oauth/code';
 const ATTR = {
     CLIENT_ID: 'client_id',
     CODE: 'code',
-    DATE_CREATED: 'date_created',
-    EXPIRES_AT: 'expires_at',
+    DATE_EXPIRED: 'date_expired',
     ID: 'id',
     REDIRECT_URI: 'redirect_uri',
     SCOPE: 'scope',
-    USER_ID: 'user_id',
+    USER_REF: 'user_ref',
 };
 Object.freeze(ATTR); // Ensure attribute mappings are immutable
 
@@ -37,11 +36,11 @@ Object.freeze(ATTR); // Ensure attribute mappings are immutable
  */
 class Dto {
     /**
-     * Primary key for the authorization code.
+     * Reference to the associated client.
      *
      * @type {number}
      */
-    id;
+    client_id;
 
     /**
      * Generated authorization code.
@@ -51,25 +50,18 @@ class Dto {
     code;
 
     /**
-     * Reference to the associated client.
-     *
-     * @type {number}
-     */
-    client_id;
-
-    /**
-     * Reference to the associated user.
-     *
-     * @type {number}
-     */
-    user_id;
-
-    /**
      * Expiration time for the authorization code.
      *
      * @type {Date}
      */
-    expires_at;
+    date_expired;
+
+    /**
+     * Primary key for the authorization code.
+     *
+     * @type {number}
+     */
+    id;
 
     /**
      * Redirect URI provided during authorization.
@@ -84,6 +76,13 @@ class Dto {
      * @type {string|null}
      */
     scope;
+
+    /**
+     * Reference to the associated user.
+     *
+     * @type {number}
+     */
+    user_ref;
 }
 
 /**
@@ -113,13 +112,13 @@ export default class Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Code {
          */
         this.createDto = function (data) {
             const res = new Dto();
-            res.id = cast.int(data?.id);
-            res.code = cast.string(data?.code);
             res.client_id = cast.int(data?.client_id);
-            res.user_id = cast.int(data?.user_id);
-            res.expires_at = cast.date(data?.expires_at);
+            res.code = cast.string(data?.code);
+            res.date_expired = cast.date(data?.date_expired);
+            res.id = cast.int(data?.id);
             res.redirect_uri = cast.string(data?.redirect_uri);
             res.scope = cast.string(data?.scope);
+            res.user_ref = cast.int(data?.user_ref);
             return res;
         };
 

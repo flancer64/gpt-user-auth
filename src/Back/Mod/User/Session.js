@@ -170,6 +170,7 @@ export default class Fl64_Gpt_User_Back_Mod_User_Session {
                         expires: DEF.COOKIE_SESSION_LIFETIME,
                         name: DEF.COOKIE_SESSION,
                         path: '/',
+                        sameSite:'None',
                         value: dbSession.session_id,
                     });
                     utilCookie.set({response: res, cookie});

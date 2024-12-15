@@ -7,13 +7,13 @@ const domDto = await container.get('Fl64_Gpt_User_Shared_Dto_OAuth2_Code$');
 
 describe('Fl64_Gpt_User_Shared_Dto_OAuth2_Code', () => {
     const expectedProperties = [
-        'id',
-        'code',
         'clientId',
-        'userId',
-        'expiresAt',
+        'code',
+        'dateExpired',
+        'id',
         'redirectUri',
         'scope',
+        'userRef',
     ];
 
     it('should create a Domain DTO with only the expected properties', () => {
@@ -51,8 +51,8 @@ describe('Fl64_Gpt_User_Shared_Dto_OAuth2_Code', () => {
         assert.strictEqual(dto.id, sampleData.id, 'DTO id should match');
         assert.strictEqual(dto.code, sampleData.code, 'DTO code should match');
         assert.strictEqual(dto.clientId, sampleData.clientId, 'DTO clientId should match');
-        assert.strictEqual(dto.userId, sampleData.userId, 'DTO userId should match');
-        assert.deepStrictEqual(dto.expiresAt, sampleData.expiresAt, 'DTO expiresAt should match');
+        assert.strictEqual(dto.userRef, sampleData.userRef, 'DTO userId should match');
+        assert.deepStrictEqual(dto.dateExpired, sampleData.dateExpired, 'DTO expiresAt should match');
         assert.strictEqual(dto.redirectUri, sampleData.redirectUri, 'DTO redirectUri should match');
         assert.strictEqual(dto.scope, sampleData.scope, 'DTO scope should match');
     });
