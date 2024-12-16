@@ -103,7 +103,9 @@
         {{scope}}
     </div>
 
-    <form method="POST" action="{{redirectUri}}">
+    <form method="GET" action="{{redirectUri}}">
+        <input type="hidden" name="code" value="{{code}}">
+        <input type="hidden" name="state" value="{{state}}">
         <button class="button" type="submit">Authorize</button>
         <button class="button cancel" type="button" onclick="window.history.back()">Cancel</button>
     </form>

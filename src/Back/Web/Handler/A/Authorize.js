@@ -15,6 +15,11 @@ const {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /**
+ * Handles OAuth2 authorization workflows.
+ *
+ * This class processes incoming HTTP requests for authorization,
+ * manages sessions, and responds with appropriate templates or JSON responses.
+ * It integrates with database modules and OAuth2-related services.
  */
 export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
     /**
@@ -22,7 +27,7 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
      * @param {TeqFw_Web_Back_App_Server_Respond} respond - Error response helper
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Client} modClient
-     * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Token} modToken
+     * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Code} modCode
      * @param {Fl64_Gpt_User_Back_Mod_User_Session} modSession
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {Fl64_Gpt_User_Back_Web_Handler_A_Authorize_A_Helper} aHelper
@@ -33,7 +38,7 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
             TeqFw_Web_Back_App_Server_Respond$: respond,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Mod_OAuth2_Client$: modClient,
-            Fl64_Gpt_User_Back_Mod_OAuth2_Token$: modToken,
+            Fl64_Gpt_User_Back_Mod_OAuth2_Code$: modCode,
             Fl64_Gpt_User_Back_Mod_User_Session$: modSession,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
             Fl64_Gpt_User_Back_Web_Handler_A_Authorize_A_Helper$: aHelper,
@@ -43,6 +48,11 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
 
         // MAIN
         /**
+         * Main entry point for handling HTTP requests.
+         *
+         * Depending on the authentication state and request method,
+         * it directs to either login or authorization workflows.
+         *
          * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request
          * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object
          *
@@ -84,79 +94,118 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
             }
 
             /**
+             * Handles the OAuth2 authorization workflow via GET requests.
+             *
+             * The function retrieves query parameters, validates the client, and generates an authorization code
+             * if the request meets all criteria. It sends the generated code and additional details to the user's browser
+             * using an HTML template.
+             *
              * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
-             * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object
+             * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object.
              * @return {Promise<void>}
              */
             async function doAuthorizeGet(req, res) {
                 const trx = await conn.startTransaction();
                 try {
                     const url = new URL(req.url, `https://${req.headers.host}`);
-                    const params = new URLSearchParams(url.search); // Разбираем строку запроса на параметры
+                    const params = new URLSearchParams(url.search);
+
+                    // Extract and validate required OAuth2 parameters
                     const clientId = params.get('client_id');
                     const scope = params.get('scope');
                     const redirectUri = params.get('redirect_uri');
                     const state = params.get('state');
                     const responseType = params.get('response_type');
-                    if (responseType === 'code') {
-                        const found = await modClient.read({trx, clientId});
 
-                        // Resolve path to the authorize template
-                        const filePath = path.resolve(__dirname, '../../../../../web/tmpl/oauth2/authorize.html');
-                        await handleTemplate(filePath, res, {
-                            clientName: found.name,
-                            redirectUri: redirectUri,
-                            responseType: responseType,
-                            scope: scope,
-                            state: state,
-                        });
+                    if (responseType === 'code') {
+                        // Fetch and validate the client from the database
+                        const client = await modClient.read({trx, clientId});
+                        if (client) {
+                            // Retrieve user session from the request and create an authorization code
+                            const session = await modSession.getSessionFromRequest({trx, req});
+                            const dto = modCode.composeEntity();
+                            dto.clientRef = client.id;
+                            dto.dateExpired = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
+                            dto.redirectUri = redirectUri;
+                            dto.scope = scope;
+                            dto.userRef = session.userRef;
+                            const created = await modCode.create({trx, dto});
+
+                            // Render the authorization template with provided variables
+                            const filePath = path.resolve(__dirname, '../../../../../web/tmpl/oauth2/authorize.html');
+                            await handleTemplate(filePath, res, {
+                                clientName: client.name,
+                                code: created.code,
+                                redirectUri: redirectUri,
+                                responseType: responseType,
+                                scope: scope,
+                                state: state,
+                            });
+                        } else {
+                            respond.status404(res, 'Client not found');
+                        }
                     } else {
-                        // TODO:
+                        respond.status400(res, 'Invalid response type');
                     }
-                    // Commit the transaction
+                    // Commit the transaction after successful processing
                     await trx.commit();
                 } catch (error) {
+                    // Rollback the transaction and log the exception in case of errors
                     logger.exception(error);
                     await trx.rollback();
                     respond.status500(res, error?.message);
                 }
             }
 
-
+            /**
+             * Handles the OAuth2 login workflow via GET requests.
+             *
+             * The function renders an HTML form that prompts the user to log in.
+             *
+             * @return {Promise<void>}
+             */
             async function doLoginGet() {
-                // Resolve path to the login template
+                // Render the login form template
                 const filePath = path.resolve(__dirname, '../../../../../web/tmpl/oauth2/login.html');
                 await handleTemplate(filePath, res);
             }
 
             /**
+             * Handles the OAuth2 login workflow via POST requests.
+             *
+             * The function extracts login credentials from the request, validates them,
+             * and establishes a new session if authentication is successful.
+             *
              * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
-             * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object
+             * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object.
              * @return {Promise<void>}
              */
             async function doLoginPost(req, res) {
-                // Collect incoming data
+                // Extract credentials from the request body
                 const {identifier, password} = await aHelper.extractAuthParams({req});
                 if (identifier && password) {
                     const trx = await conn.startTransaction();
                     try {
-                        // Validate the user credentials and establish a new user session
+                        // Authenticate the user and establish a new session
                         const authenticatedUser = await modUser.authenticate({trx, identifier, password});
                         if (authenticatedUser) {
                             await modSession.establish({trx, user: authenticatedUser, req, res});
-                            // Send response to refresh the page
+
+                            // Redirect the user to refresh the page after login
                             respond.status303(res, req.url);
                         } else {
                             respond.status401(res, 'Invalid credentials');
                         }
-                        // Commit the transaction
+                        // Commit the transaction on successful login
                         await trx.commit();
                     } catch (error) {
+                        // Rollback the transaction and log the exception in case of errors
                         logger.exception(error);
                         await trx.rollback();
                         respond.status500(res, error?.message);
                     }
                 } else {
+                    // Respond with an error if required fields are missing
                     respond.status400(res, 'Missing identifier or password');
                 }
             }

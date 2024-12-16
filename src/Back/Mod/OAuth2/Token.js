@@ -1,3 +1,5 @@
+import {randomUUID} from 'crypto';
+
 /**
  * Manages OAuth2 Token data in a relational database.
  *
@@ -48,13 +50,22 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Token {
         }
 
         // MAIN METHODS
+        /**
+         * @type {function(Fl64_Gpt_User_Shared_Dto_OAuth2_Token.Dto=): Fl64_Gpt_User_Shared_Dto_OAuth2_Token.Dto}
+         */
         this.composeEntity = dtoToken.createDto;
+
+        /**
+         * @type {function(Fl64_Gpt_User_Shared_Dto_OAuth2_Token.Dto=): Fl64_Gpt_User_Shared_Dto_OAuth2_Token.Dto}
+         */
         this.composeItem = dtoToken.createDto;
 
         this.create = async function ({trx, dto}) {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
                 const {dbToken} = convToken.dom2db({token: dto});
+                if (!dbToken.access_token) dbToken.access_token = randomUUID();
+                if (!dbToken.refresh_token) dbToken.refresh_token = randomUUID();
                 const id = await createEntity(trxLocal, dbToken);
 
                 const createdDbToken = await readEntity(trxLocal, id);

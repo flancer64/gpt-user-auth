@@ -64,10 +64,12 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Code {
          *
          * @param {TeqFw_Db_Back_RDb_ITrans} trx - The transaction context.
          * @param {number} id - The ID of the code to retrieve.
+         * @param {string} code - The code value of the code to retrieve.
          * @returns {Promise<Fl64_Gpt_User_Back_Store_RDb_Schema_OAuth2_Code.Dto|null>} - The retrieved record or `null`.
          */
-        async function readEntity({trx, id}) {
-            return await crud.readOne(trx, rdbCode, {[ATTR.ID]: id});
+        async function readEntity({trx, id, code}) {
+            const key = typeof code === 'string' ? {[ATTR.CODE]: code.trim().toLowerCase()} : id;
+            return await crud.readOne(trx, rdbCode, key);
         }
 
         /**
@@ -126,13 +128,14 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Code {
          * Reads an OAuth2 authorization code by ID.
          *
          * @param {TeqFw_Db_Back_RDb_ITrans} [trx] - Optional transaction context.
-         * @param {number} id - The ID of the code to retrieve.
+         * @param {number} [id] - The ID of the code to retrieve.
+         * @param {string} [code] - The code value of the code to retrieve.
          * @returns {Promise<Fl64_Gpt_User_Shared_Dto_OAuth2_Code.Dto|null>}
          */
-        this.read = async function ({trx, id}) {
+        this.read = async function ({trx, id, code}) {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
-                const dbCode = await readEntity({trx: trxLocal, id});
+                const dbCode = await readEntity({trx: trxLocal, id, code});
                 const res = dbCode ? convCode.db2dom({dbCode}) : null;
                 if (!trx) await trxLocal.commit();
                 logger.info(`OAuth2 authorization code #${id} retrieved.`);
