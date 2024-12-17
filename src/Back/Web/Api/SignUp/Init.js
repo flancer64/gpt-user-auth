@@ -54,7 +54,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Init {
          */
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
-            if (modAuth.isValidRequest(context?.request)) {
+            if (await modAuth.isValidRequest(context?.request)) {
                 const rs = endpoint.createRes();
                 rs.resultCode = CODE.SERVER_ERROR;
                 rs.instructions = `

@@ -17,6 +17,7 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
      * @param {TeqFw_Core_Back_Config} config
      * @param {TeqFw_Core_Shared_Api_Logger} logger
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
+     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS
      */
     constructor(
@@ -25,6 +26,7 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
             TeqFw_Core_Back_Config$: config,
             TeqFw_Core_Shared_Api_Logger$$: logger,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Gpt_User_Back_Mod_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_User_Status.default': STATUS,
         }
     ) {
@@ -56,9 +58,9 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
          * Validates the presence and authorization of a Bearer token in the HTTP request.
          * Ensures that either the OpenAI ephemeral user ID header is present or a valid Bearer token is provided.
          * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - The incoming HTTP request.
-         * @returns {boolean} True if the request is authorized; otherwise, false.
+         * @returns {Promise<boolean>} True if the request is authorized; otherwise, false.
          */
-        this.isValidRequest = function (req) {
+        this.isValidRequest = async function (req) {
             let result = false;
             try {
                 const oaiUserHeader = req?.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID];
@@ -68,8 +70,11 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
                         const bearerToken = authHeader.slice(7); // Remove 'Bearer ' prefix
                         const allowed = getAllowedBearers();
                         if (allowed.includes(bearerToken)) {
+                            // this is a hardcoded token from app config (./cfg.local.json)
                             result = true;
                         } else {
+                            // try to find the token in OAuth2 tokens
+                            const found = await modToken.read({code: bearerToken});
                             logger.error(`Authorization failed: Invalid Bearer token '${bearerToken}'.`);
                         }
                     }

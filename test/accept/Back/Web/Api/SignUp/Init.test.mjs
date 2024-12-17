@@ -73,7 +73,7 @@ describe('Fl64_Gpt_User_Back_Web_Api_SignUp_Init', () => {
             }
         };
 
-        modAuth.isValidRequest = (req) => {
+        modAuth.isValidRequest = async (req) => {
             assert.strictEqual(req.headers[DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID], OAI_USER_ID);
             return true;
         };

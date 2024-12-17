@@ -53,7 +53,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
             // Ensure the request is authorized
-            if (!modAuth.isValidRequest(context?.request)) {
+            if (await !modAuth.isValidRequest(context?.request)) {
                 respond.status403(context?.response);
                 return;
             }

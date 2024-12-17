@@ -17,7 +17,7 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
         config.getLocal = () => ({authBearerTokens: [TOKEN]});
     });
 
-    it('should return true for a valid Bearer token and user ID from Open AI', () => {
+    it('should return true for a valid Bearer token and user ID from Open AI', async () => {
         const req = {
             headers: {
                 authorization: `Bearer ${TOKEN}`,
@@ -25,38 +25,38 @@ describe('Fl64_Gpt_User_Back_Mod_Auth - Unit Tests', () => {
             },
         };
 
-        const result = modAuth.isValidRequest(req);
+        const result = await modAuth.isValidRequest(req);
         assert.strictEqual(result, true, 'Expected true for a valid Bearer token and user ID from Open AI');
     });
 
-    it('should return false if Open AI header is missed', () => {
+    it('should return false if Open AI header is missed', async () => {
         const req = {
             headers: {
                 authorization: `Bearer ${TOKEN}`
             },
         };
-        const result = modAuth.isValidRequest(req);
+        const result = await modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false for missed Open AI header');
     });
 
-    it('should return false for an invalid Bearer token', () => {
+    it('should return false for an invalid Bearer token', async () => {
         const req = {
             headers: {
                 authorization: 'Bearer invalid-token',
                 [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID,
             },
         };
-        const result = modAuth.isValidRequest(req);
+        const result = await modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false for an invalid Bearer token');
     });
 
-    it('should return false if no Bearer token is provided', () => {
+    it('should return false if no Bearer token is provided', async () => {
         const req = {
             headers: {
                 [DEF.HTTP_HEAD_OPENAI_EPHEMERAL_USER_ID]: OAI_USER_ID,
             },
         };
-        const result = modAuth.isValidRequest(req);
+        const result = await modAuth.isValidRequest(req);
         assert.strictEqual(result, false, 'Expected false if no Bearer token is provided');
     });
 
