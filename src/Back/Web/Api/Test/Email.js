@@ -11,6 +11,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
      * @param {Fl64_Gpt_User_Back_Util_Log} utilLog
      * @param {Fl64_Gpt_User_Back_Mod_Auth} modAuth
      * @param {Fl64_Gpt_User_Back_Mod_Openai_User} modOaiUser
+     * @param {Fl64_Gpt_User_Back_Mod_User} modUser
      * @param {TeqFw_Email_Back_Act_Send} actSend
      */
     constructor(
@@ -23,6 +24,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
             Fl64_Gpt_User_Back_Util_Log$: utilLog,
             Fl64_Gpt_User_Back_Mod_Auth$: modAuth,
             Fl64_Gpt_User_Back_Mod_Openai_User$: modOaiUser,
+            Fl64_Gpt_User_Back_Mod_User$: modUser,
             TeqFw_Email_Back_Act_Send$: actSend,
         }
     ) {
@@ -53,7 +55,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
         this.process = async function (req, res, context) {
             utilLog.traceOpenAi(context?.request);
             // Ensure the request is authorized
-            if (await !modAuth.isValidRequest(context?.request)) {
+            if (!(await modAuth.isValidRequest(context?.request))) {
                 respond.status403(context?.response);
                 return;
             }
@@ -65,8 +67,11 @@ export default class Fl64_Gpt_User_Back_Web_Api_Test_Email {
             const trx = await conn.startTransaction();
 
             try {
-                // Retrieve user details by PIN
-                const foundUser = await modAuth.loadUser({trx, pin: req.pin, passPhrase: req.passPhrase});
+                const authData = modAuth.getContextData(context.request);
+                // Retrieve user details by ID or by PIN & password
+                const foundUser = (authData?.userId)
+                    ? await modUser.read({trx, userRef: authData.userId})
+                    : await modAuth.loadUser({trx, pin: req.pin, passPhrase: req.passPhrase});
                 if (!foundUser) {
                     // Handle unauthenticated or inactive user
                     resultCode = CODE.UNAUTHENTICATED;

@@ -86,10 +86,12 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
                             // try to find the token in OAuth2 tokens
                             const found = await modToken.read({tokenAccess: bearerToken});
                             if (found) {
+                                // this is an OAuth2 token
                                 const dto = storeRequest.composeEntity();
                                 dto.clientId = found.clientRef;
                                 dto.userId = found.userRef;
                                 storeRequest.create(req, dto);
+                                result = true;
                             } else {
                                 logger.error(`Authorization failed: Invalid Bearer token '${bearerToken}'.`);
                             }
