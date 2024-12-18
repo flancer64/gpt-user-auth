@@ -16,8 +16,9 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
      * @param {Fl64_Gpt_User_Back_Defaults} DEF
      * @param {TeqFw_Core_Back_Config} config
      * @param {TeqFw_Core_Shared_Api_Logger} logger
+     * @param {Fl64_Gpt_User_Back_Store_Context_HttpRequest} storeRequest
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
+     * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS
      */
     constructor(
@@ -25,15 +26,16 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
             Fl64_Gpt_User_Back_Defaults$: DEF,
             TeqFw_Core_Back_Config$: config,
             TeqFw_Core_Shared_Api_Logger$$: logger,
+            Fl64_Gpt_User_Back_Store_Context_HttpRequest$: storeRequest,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
+            Fl64_Gpt_User_Back_Mod_OAuth2_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_User_Status.default': STATUS,
         }
     ) {
         // VARS
         /**
          * @type {string[]}
-         * List of authorized Bearer tokens.
+         * List of authorized Bearer tokens from local config.
          */
         let BEARERS;
 
@@ -53,6 +55,14 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
         }
 
         // MAIN
+        /**
+         * Extract authentication data stored in the request context.
+         * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - The incoming HTTP request.
+         * @return {Fl64_Gpt_User_Back_Dto_OAuth2_Context.Dto}
+         */
+        this.getContextData = function (req) {
+            return storeRequest.read(req);
+        };
 
         /**
          * Validates the presence and authorization of a Bearer token in the HTTP request.
@@ -74,8 +84,15 @@ export default class Fl64_Gpt_User_Back_Mod_Auth {
                             result = true;
                         } else {
                             // try to find the token in OAuth2 tokens
-                            const found = await modToken.read({code: bearerToken});
-                            logger.error(`Authorization failed: Invalid Bearer token '${bearerToken}'.`);
+                            const found = await modToken.read({tokenAccess: bearerToken});
+                            if (found) {
+                                const dto = storeRequest.composeEntity();
+                                dto.clientId = found.clientRef;
+                                dto.userId = found.userRef;
+                                storeRequest.create(req, dto);
+                            } else {
+                                logger.error(`Authorization failed: Invalid Bearer token '${bearerToken}'.`);
+                            }
                         }
                     }
                 } else {

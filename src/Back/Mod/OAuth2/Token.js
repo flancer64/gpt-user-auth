@@ -41,8 +41,10 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Token {
             return await crud.deleteOne(trx, rdbToken, {[ATTR.ID]: id});
         }
 
-        async function readEntity(trx, id) {
-            return await crud.readOne(trx, rdbToken, {[ATTR.ID]: id});
+        async function readEntity(trx, id, access) {
+            let key = id;
+            if (access) key = {[ATTR.ACCESS_TOKEN]: access};
+            return await crud.readOne(trx, rdbToken, key);
         }
 
         async function updateEntity(trx, dbToken) {
@@ -80,10 +82,10 @@ export default class Fl64_Gpt_User_Back_Mod_OAuth2_Token {
             }
         };
 
-        this.read = async function ({trx, tokenId}) {
+        this.read = async function ({trx, tokenId, tokenAccess}) {
             const trxLocal = trx ?? await conn.startTransaction();
             try {
-                const dbToken = await readEntity(trxLocal, tokenId);
+                const dbToken = await readEntity(trxLocal, tokenId, tokenAccess);
                 const result = dbToken ? convToken.db2dom({dbToken}) : null;
                 if (!trx) await trxLocal.commit();
                 logger.info(`OAuth2 token #${tokenId} retrieved.`);
