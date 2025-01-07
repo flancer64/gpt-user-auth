@@ -28,8 +28,8 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Client} modClient
      * @param {Fl64_Gpt_User_Back_Mod_OAuth2_Code} modCode
-     * @param {Fl64_Gpt_User_Back_Mod_User_Session} modSession
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
+     * @param {Fl64_Web_Session_Back_Manager} mgrSession
      * @param {Fl64_Gpt_User_Back_Web_Handler_A_Authorize_A_Helper} aHelper
      */
     constructor(
@@ -39,8 +39,8 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Mod_OAuth2_Client$: modClient,
             Fl64_Gpt_User_Back_Mod_OAuth2_Code$: modCode,
-            Fl64_Gpt_User_Back_Mod_User_Session$: modSession,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
+            Fl64_Web_Session_Back_Manager$: mgrSession,
             Fl64_Gpt_User_Back_Web_Handler_A_Authorize_A_Helper$: aHelper,
         }
     ) {
@@ -102,9 +102,10 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
              *
              * @param {module:http.IncomingMessage|module:http2.Http2ServerRequest} req - Incoming HTTP request.
              * @param {module:http.ServerResponse|module:http2.Http2ServerResponse} res - HTTP response object.
+             * @param {Fl64_Web_Session_Back_Store_RDb_Schema_Session.Dto} session
              * @return {Promise<void>}
              */
-            async function doAuthorizeGet(req, res) {
+            async function doAuthorizeGet(req, res, session) {
                 const trx = await conn.startTransaction();
                 try {
                     const url = new URL(req.url, `https://${req.headers.host}`);
@@ -121,14 +122,12 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
                         // Fetch and validate the client from the database
                         const client = await modClient.read({trx, clientId});
                         if (client) {
-                            // Retrieve user session from the request and create an authorization code
-                            const session = await modSession.getSessionFromRequest({trx, req});
                             const dto = modCode.composeEntity();
                             dto.clientRef = client.id;
                             dto.dateExpired = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
                             dto.redirectUri = redirectUri;
                             dto.scope = scope;
-                            dto.userRef = session.userRef;
+                            dto.userRef = session.user_ref;
                             const created = await modCode.create({trx, dto});
 
                             // Render the authorization template with provided variables
@@ -189,8 +188,13 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
                         // Authenticate the user and establish a new session
                         const authenticatedUser = await modUser.authenticate({trx, identifier, password});
                         if (authenticatedUser) {
-                            await modSession.establish({trx, user: authenticatedUser, req, res});
-
+                            await mgrSession.establishSession({
+                                trx,
+                                userId: authenticatedUser.userRef,
+                                data: authenticatedUser,
+                                httpRequest: req,
+                                httpResponse: res,
+                            });
                             // Redirect the user to refresh the page after login
                             respond.status303(res, req.url);
                         } else {
@@ -213,9 +217,9 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
             // MAIN
             try {
                 // Check if the user is authenticated
-                const sessionEstablished = await modSession.getSessionFromRequest({req});
+                const {dto: sessionEstablished} = await mgrSession.getSessionFromRequest({req});
                 if (sessionEstablished) {
-                    await doAuthorizeGet(req, res);
+                    await doAuthorizeGet(req, res, sessionEstablished);
                 } else {
                     if (req.method === HTTP2_METHOD_GET) {
                         await doLoginGet();
