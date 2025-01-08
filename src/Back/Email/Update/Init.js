@@ -24,7 +24,7 @@ export default class Fl64_Gpt_User_Back_Email_Update_Init {
      * @param {TeqFw_Db_Back_RDb_IConnect} conn - Database connection interface.
      * @param {TeqFw_Email_Back_Service_Send} serviceSend - Email service for sending messages.
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser - User data model for retrieving user information.
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken - Token model for managing user tokens.
+     * @param {Fl64_Otp_Back_Mod_Token} modToken - Token model for managing user tokens.
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN - Token type enumeration.
      */
     constructor(
@@ -35,7 +35,7 @@ export default class Fl64_Gpt_User_Back_Email_Update_Init {
             TeqFw_Db_Back_RDb_IConnect$: conn,
             TeqFw_Email_Back_Service_Send$: serviceSend,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
+            Fl64_Otp_Back_Mod_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN,
         }
     ) {
@@ -100,12 +100,9 @@ export default class Fl64_Gpt_User_Back_Email_Update_Init {
          * @returns {Promise<{edit_link: string}>}
          */
         this.prepareVars = async function (trx, user) {
-            const dto = modToken.composeEntity();
-            dto.userRef = user.userRef;
-            dto.type = TOKEN.PROFILE_EDIT;
-            const dtoToken = await modToken.create({trx, dto});
+            const {token} = await modToken.create({trx, userId: user.userRef, type: TOKEN.PROFILE_EDIT});
             const base = getBaseUrl();
-            return {edit_link: base.replace(':code', dtoToken.code)};
+            return {edit_link: base.replace(':code', token)};
         };
 
         /**

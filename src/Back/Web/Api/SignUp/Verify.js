@@ -11,7 +11,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
      * @param {Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify} endpoint
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
+     * @param {Fl64_Otp_Back_Mod_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_User_Status} STATUS
      */
     constructor(
@@ -20,7 +20,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
             Fl64_Gpt_User_Shared_Web_Api_SignUp_Verify$: endpoint,
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
+            Fl64_Otp_Back_Mod_Token$: modToken,  
             'Fl64_Gpt_User_Shared_Enum_User_Status.default': STATUS,
         }
     ) {
@@ -48,12 +48,12 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
                 const code = req.token;
 
                 // Find the verification record by token
-                const dtoToken = await modToken.read({trx, code});
+                const {dto: dtoToken} = await modToken.read({trx, token: code});
                 if (!dtoToken) {
                     rs.resultCode = RESULT_CODE.INVALID_TOKEN;
                 } else {
                     // Retrieve associated user
-                    const dtoUser = await modUser.read({trx, userRef: dtoToken.userRef});
+                    const dtoUser = await modUser.read({trx, userRef: dtoToken.user_ref});
                     if (dtoUser) {
                         // Update user status to confirmed
                         if (dtoUser.status === STATUS.UNVERIFIED) {
@@ -61,7 +61,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_SignUp_Verify {
                             await modUser.update({trx, dto: dtoUser});
                         }
                         // Delete the verification token after successful verification
-                        await modToken.delete({trx, dto: dtoToken});
+                        await modToken.delete({trx, id: dtoToken.id});
 
                         // Populate response with user profile data
                         rs.dateCreated = dtoUser.dateCreated;

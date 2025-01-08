@@ -24,7 +24,7 @@ export default class Fl64_Gpt_User_Back_Email_SignUp_Init {
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {TeqFw_Email_Back_Service_Send} serviceSend
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
+     * @param {Fl64_Otp_Back_Mod_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN
      */
     constructor(
@@ -35,7 +35,7 @@ export default class Fl64_Gpt_User_Back_Email_SignUp_Init {
             TeqFw_Db_Back_RDb_IConnect$: conn,
             TeqFw_Email_Back_Service_Send$: serviceSend,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
+            Fl64_Otp_Back_Mod_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN,
         }
     ) {
@@ -101,12 +101,9 @@ export default class Fl64_Gpt_User_Back_Email_SignUp_Init {
          * @returns {Promise<{verify_link: string}>}
          */
         this.prepareVars = async function (trx, user) {
-            const dto = modToken.composeEntity();
-            dto.userRef = user.userRef;
-            dto.type = TOKEN.EMAIL_VERIFICATION;
-            const dtoToken = await modToken.create({trx, dto});
+            const {token} = await modToken.create({trx, userId: user.userRef, type: TOKEN.EMAIL_VERIFICATION});
             const base = getBaseUrl();
-            return {verify_link: base.replace(':code', dtoToken.code)};
+            return {verify_link: base.replace(':code', token)};
         };
 
         /**

@@ -19,7 +19,6 @@ purposes.
 
 - **Fl64_Gpt_User_Back_Mod_Auth**: Validates Bearer tokens in HTTP requests and provides methods for loading user data
   by PIN and passphrase, ensuring proper authentication and user status verification.
-- **Fl64_Gpt_User_Back_Mod_Token**: Manages secure tokens for email verification and profile updates.
 - **Fl64_Gpt_User_Back_Mod_User**: Represents user data.
 
 ## Emails

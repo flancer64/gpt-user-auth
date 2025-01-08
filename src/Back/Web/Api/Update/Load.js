@@ -12,7 +12,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
      * @param {TeqFw_Db_Back_RDb_IConnect} conn
      * @param {Fl64_Gpt_User_Shared_Web_Api_Update_Load} endpoint
      * @param {Fl64_Gpt_User_Back_Mod_User} modUser
-     * @param {Fl64_Gpt_User_Back_Mod_Token} modToken
+     * @param {Fl64_Otp_Back_Mod_Token} modToken
      * @param {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} TOKEN_TYPE
      */
     constructor(
@@ -21,7 +21,7 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
             TeqFw_Db_Back_RDb_IConnect$: conn,
             Fl64_Gpt_User_Shared_Web_Api_Update_Load$: endpoint,
             Fl64_Gpt_User_Back_Mod_User$: modUser,
-            Fl64_Gpt_User_Back_Mod_Token$: modToken,
+            Fl64_Otp_Back_Mod_Token$: modToken,
             'Fl64_Gpt_User_Shared_Enum_Token_Type.default': TOKEN_TYPE,
         }
     ) {
@@ -50,9 +50,9 @@ export default class Fl64_Gpt_User_Back_Web_Api_Update_Load {
                 if (!token) {
                     res.resultCode = RES_CODE.INVALID_TOKEN;
                 } else {
-                    const foundToken = await modToken.read({trx, code: token});
+                    const {dto:foundToken} = await modToken.read({trx,   token});
                     if (foundToken && (foundToken.type === TOKEN_TYPE.PROFILE_EDIT)) {
-                        const userId = foundToken.userRef;
+                        const userId = foundToken.user_ref;
                         /** @type {Fl64_Gpt_User_Shared_Dto_User.Dto} */
                         const user = await modUser.read({trx, userRef: userId});
                         if (user) {

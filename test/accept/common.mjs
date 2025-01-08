@@ -45,12 +45,31 @@ export async function dbCreateFkEntities(container) {
     await dbConnect(container);
     const trx = await conn.startTransaction();
     try {
+        // TODO: this test should be independent of a project
         const rdbBase = {
-            getAttributes: () => ({ID: 'id'}),
+            getAttributes: () => ({
+                DATE_BIRTH: 'date_birth',
+                DATE_CREATED: 'date_created',
+                GENDER: 'gender',
+                HEIGHT: 'height',
+                ID: 'id',
+                NAME: 'name',
+                TOKEN: 'token',
+                WEIGHT_CURRENT: 'weight_current'
+            }),
             getEntityName: () => '/user',
             getPrimaryKey: () => ['id'],
         };
-        const {id} = await crud.create(trx, rdbBase, {id: undefined});
+        const {id} = await crud.create(trx, rdbBase, {
+            date_birth: new Date(),
+            date_created: new Date(),
+            gender: 'MALE',
+            height: 180,
+            id: undefined,
+            name: 'user',
+            token: 'token',
+            weight_current: 75,
+        });
         await trx.commit();
         user.id = id;
     } catch (e) {

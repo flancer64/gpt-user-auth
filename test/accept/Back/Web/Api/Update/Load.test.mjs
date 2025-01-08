@@ -18,8 +18,8 @@ const RESULT_CODE = endpoint.getResultCodes();
 
 /** @type {Fl64_Gpt_User_Back_Mod_User} */
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
-/** @type {Fl64_Gpt_User_Back_Mod_Token} */
-const modToken = await container.get('Fl64_Gpt_User_Back_Mod_Token$');
+/** @type {Fl64_Otp_Back_Mod_Token} */
+const modToken = await container.get('Fl64_Otp_Back_Mod_Token$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} */
 const TOKEN_TYPE = await container.get('Fl64_Gpt_User_Shared_Enum_Token_Type.default');
 
@@ -46,18 +46,15 @@ describe('Fl64_Gpt_User_Back_Web_Api_Update_Load', () => {
             PIN = userDb.pin;
 
             // Create valid token
-            const dtoToken = modToken.composeEntity();
-            dtoToken.type = TOKEN_TYPE.PROFILE_EDIT;
-            dtoToken.userRef = USER_ID;
-            const createdToken = await modToken.create({dto: dtoToken});
-            TOKEN = createdToken.code;
+            const {token: createdToken} = await modToken.create({userId: USER_ID, type: TOKEN_TYPE.PROFILE_EDIT});
+            TOKEN = createdToken;
 
             // Create token with different type
-            const dtoTokenOther = modToken.composeEntity();
-            dtoTokenOther.type = TOKEN_TYPE.EMAIL_VERIFICATION;
-            dtoTokenOther.userRef = USER_ID;
-            const createdTokenOther = await modToken.create({dto: dtoTokenOther});
-            TOKEN_OTHER = createdTokenOther.code;
+            const {token: createdTokenOther} = await modToken.create({
+                userId: USER_ID,
+                type: TOKEN_TYPE.EMAIL_VERIFICATION
+            });
+            TOKEN_OTHER = createdTokenOther;
         });
 
         after(async () => {

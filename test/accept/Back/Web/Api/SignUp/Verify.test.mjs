@@ -10,8 +10,8 @@ await initConfig(container);
 // SETUP ENVIRONMENT
 /** @type {Fl64_Gpt_User_Back_Mod_User} */
 const modUser = await container.get('Fl64_Gpt_User_Back_Mod_User$');
-/** @type {Fl64_Gpt_User_Back_Mod_Token} */
-const modToken = await container.get('Fl64_Gpt_User_Back_Mod_Token$');
+/** @type {Fl64_Otp_Back_Mod_Token} */
+const modToken = await container.get('Fl64_Otp_Back_Mod_Token$');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_User_Status} */
 const STATUS = await container.get('Fl64_Gpt_User_Shared_Enum_User_Status.default');
 /** @type {typeof Fl64_Gpt_User_Shared_Enum_Token_Type} */
@@ -71,11 +71,8 @@ describe('Fl64_Gpt_User_Back_Web_Api_SignUp_Verify', () => {
         PIN = createdUser.pin;
 
         // create a token
-        const dtoToken = modToken.composeEntity();
-        dtoToken.type = TYPE.EMAIL_VERIFICATION;
-        dtoToken.userRef = USER_ID;
-        const createdToken = await modToken.create({trx, dto: dtoToken});
-        TOKEN_CODE = createdToken.code;
+        const {token: createdToken} = await modToken.create({trx, userId: USER_ID, type: TYPE.EMAIL_VERIFICATION});
+        TOKEN_CODE = createdToken;
         await trx.commit();
 
         service = await container.get('Fl64_Gpt_User_Back_Web_Api_SignUp_Verify$');

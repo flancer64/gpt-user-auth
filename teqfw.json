@@ -1,7 +1,7 @@
 {
   "@teqfw/di": {
     "autoload": {
-      "ns": "Fl64_Gpt_User",
+      "ns": "Fl64_Gpt_User_",
       "path": "./src"
     }
   },
