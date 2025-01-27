@@ -187,14 +187,9 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
                     try {
                         // Authenticate the user and establish a new session
                         const authenticatedUser = await modUser.authenticate({trx, identifier, password});
-                        if (authenticatedUser) {
-                            await mgrSession.establishSession({
-                                trx,
-                                userId: authenticatedUser.userRef,
-                                data: authenticatedUser,
-                                httpRequest: req,
-                                httpResponse: res,
-                            });
+                        if (authenticatedUser?.userRef) {
+                            const userId = authenticatedUser.userRef;
+                            await mgrSession.establish({trx, userId, req, res,});
                             // Redirect the user to refresh the page after login
                             respond.status303(res, req.url);
                         } else {
@@ -217,7 +212,7 @@ export default class Fl64_Gpt_User_Back_Web_Handler_A_Authorize {
             // MAIN
             try {
                 // Check if the user is authenticated
-                const {dto: sessionEstablished} = await mgrSession.getSessionFromRequest({req});
+                const {dto: sessionEstablished} = await mgrSession.getFromRequest({req});
                 if (sessionEstablished) {
                     await doAuthorizeGet(req, res, sessionEstablished);
                 } else {
